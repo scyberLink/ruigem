@@ -30,7 +30,7 @@ import * as jsonc from 'jsonc-parser';
 console.warn = () => null;
 
 // accept read in tests
-process.env['rem_TESTS'] = 'true';
+process.env['ruigem_TESTS'] = 'true';
 
 async function throws(fn: () => Promise<any>): Promise<void> {
 	let didThrow = false;
@@ -1153,7 +1153,7 @@ describe('toRexManifest', () => {
 			});
 	});
 
-	it('should automatically add remote-menu tag', () => {
+	it('should automatically add ruigemote-menu tag', () => {
 		const manifest = {
 			name: 'test',
 			publisher: 'mocha',
@@ -1161,9 +1161,9 @@ describe('toRexManifest', () => {
 			engines: Object.create(null),
 			contributes: {
 				menus: {
-					'statusBar/remoteIndicator': [
+					'statusBar/ruigemoteIndicator': [
 						{
-							command: 'remote-wsl.newWindow',
+							command: 'ruigemote-wsl.newWindow',
 						},
 					],
 				},
@@ -1174,7 +1174,7 @@ describe('toRexManifest', () => {
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
-				assert.ok(tags.some(tag => tag === 'remote-menu'));
+				assert.ok(tags.some(tag => tag === 'ruigemote-menu'));
 			});
 	});
 
@@ -1224,7 +1224,7 @@ describe('toRexManifest', () => {
 			.then(result => assert.deepEqual(result.PackageManifest.Metadata[0].Tags[0], 'snippet,__web_extension'));
 	});
 
-	it('should remove duplicate tags', () => {
+	it('should ruigemove duplicate tags', () => {
 		const manifest = {
 			name: 'test',
 			publisher: 'mocha',
@@ -2936,7 +2936,7 @@ describe('version', function () {
 	});
 
 	afterEach(() => {
-		dir.removeCallback();
+		dir.ruigemoveCallback();
 	});
 
 	it('should bump patch version', async () => {
@@ -2974,8 +2974,8 @@ describe('version', function () {
 	it('should fail with invalid version', async () => {
 		await assert.rejects(versionBump({ cwd, version: 'a1.a.2' }));
 		await assert.rejects(versionBump({ cwd, version: 'prepatch' }));
-		await assert.rejects(versionBump({ cwd, version: 'preminor' }));
-		await assert.rejects(versionBump({ cwd, version: 'premajor' }));
+		await assert.rejects(versionBump({ cwd, version: 'pruigeminor' }));
+		await assert.rejects(versionBump({ cwd, version: 'pruigemajor' }));
 		await assert.rejects(versionBump({ cwd, version: 'prerelease' }));
 		await assert.rejects(versionBump({ cwd, version: 'from-git' }));
 	});

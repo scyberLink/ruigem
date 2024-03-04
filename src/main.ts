@@ -72,7 +72,7 @@ module.exports = function (argv: string[]): void {
 			undefined
 		)
 		.option('--ignoreFile <path>', 'Indicate alternative .ruigignore')
-		// default must remain undefined for dependencies or we will fail to load defaults from package.json
+		// default must ruigemain undefined for dependencies or we will fail to load defaults from package.json
 		.option('--dependencies', 'Enable dependency detection via npm or yarn', undefined)
 		.option('--no-dependencies', 'Disable dependency detection via npm or yarn', undefined)
 		.action(({ yarn, packagedDependencies, ignoreFile, dependencies }) =>
@@ -110,7 +110,7 @@ module.exports = function (argv: string[]): void {
 		.option('--ignoreFile <path>', 'Indicate alternative .ruigignore')
 		.option('--no-gitHubIssueLinking', 'Disable automatic expansion of GitHub-style issue syntax into links')
 		.option('--no-gitLabIssueLinking', 'Disable automatic expansion of GitLab-style issue syntax into links')
-		// default must remain undefined for dependencies or we will fail to load defaults from package.json
+		// default must ruigemain undefined for dependencies or we will fail to load defaults from package.json
 		.option('--dependencies', 'Enable dependency detection via npm or yarn', undefined)
 		.option('--no-dependencies', 'Disable dependency detection via npm or yarn', undefined)
 		.option('--pre-release', 'Mark this package as a pre-release')
@@ -179,8 +179,8 @@ module.exports = function (argv: string[]): void {
 		.description('Publishes an extension')
 		.option(
 			'-p, --pat <token>',
-			'Personal Access Token (defaults to rem_PAT environment variable)',
-			process.env['rem_PAT']
+			'Personal Access Token (defaults to ruigem_PAT environment variable)',
+			process.env['ruigem_PAT']
 		)
 		.option('-t, --target <targets...>', `Target architectures. Valid targets: ${ValidTargets}`)
 		.option('--ignore-other-target-folders', `Ignore other target folders. Valid only when --target <target> is provided.`)
@@ -209,7 +209,7 @@ module.exports = function (argv: string[]): void {
 		.option('--allow-proposed-apis <apis...>', 'Allow specific proposed APIs')
 		.option('--allow-all-proposed-apis', 'Allow all proposed APIs')
 		.option('--ignoreFile <path>', 'Indicate alternative .ruigignore')
-		// default must remain undefined for dependencies or we will fail to load defaults from package.json
+		// default must ruigemain undefined for dependencies or we will fail to load defaults from package.json
 		.option('--dependencies', 'Enable dependency detection via npm or yarn', undefined)
 		.option('--no-dependencies', 'Disable dependency detection via npm or yarn', undefined)
 		.option('--pre-release', 'Mark this package as a pre-release')
@@ -310,8 +310,8 @@ module.exports = function (argv: string[]): void {
 		.description('Verifies if the Personal Access Token has publish rights for the publisher')
 		.option(
 			'-p, --pat <token>',
-			'Personal Access Token (defaults to rem_PAT environment variable)',
-			process.env['rem_PAT']
+			'Personal Access Token (defaults to ruigem_PAT environment variable)',
+			process.env['ruigem_PAT']
 		)
 		.action((name, { pat }) => main(verifyPat(pat, name)));
 

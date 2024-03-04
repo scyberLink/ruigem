@@ -1,16 +1,16 @@
 {
-	"name": "rem",
+	"name": "ruigem",
 	"version": "0.0.1",
 	"description": "Ruig Extensions Manager",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/scyberLink/rem.git"
+		"url": "git+https://github.com/scyberLink/ruigem.git"
 	},
 	"homepage": "https://code.visualstudio.com",
-	"bugs": "https://github.com/scyberLink/rem/issues",
+	"bugs": "https://github.com/scyberLink/ruigem/issues",
 	"keywords": [
 		"ruig",
-		"rem",
+		"ruigem",
 		"extension"
 	],
 	"publishConfig": {
@@ -22,9 +22,9 @@
 	"author": "scyberLink Corporation",
 	"license": "MIT",
 	"main": "out/api.js",
-	"typings": "dist/rem.d.ts",
+	"typings": "dist/ruigem.d.ts",
 	"bin": {
-		"rem": "rem"
+		"ruigem": "ruigem"
 	},
 	"scripts": {
 		"compile": "tsc",

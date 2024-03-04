@@ -77,7 +77,7 @@ export async function publish(options: IPublishOptions = {}): Promise<any> {
 			throw new Error(`Both options not supported simultaneously: 'packagePath' and 'version'.`);
 		} else if (options.targets) {
 			throw new Error(
-				`Both options not supported simultaneously: 'packagePath' and 'target'. Use 'rem package --target <target>' to first create a platform specific package, then use 'rem publish --packagePath <path>' to publish it.`
+				`Both options not supported simultaneously: 'packagePath' and 'target'. Use 'ruigem package --target <target>' to first create a platform specific package, then use 'ruigem publish --packagePath <path>' to publish it.`
 			);
 		}
 

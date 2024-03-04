@@ -51,7 +51,7 @@ export function validateEngineCompatibility(version: string): void {
  * User shouldn't use a newer version of @types/ruig than the one specified in engines.ruig
  *
  * NOTE: This is enforced at the major and minor level. Since we don't have control over the patch
- * version (it's auto-incremented by DefinitelyTyped), we don't look at the patch version at all.
+ * version (it's auto-incruigemented by DefinitelyTyped), we don't look at the patch version at all.
  */
 export function validateruigTypesCompatibility(engineVersion: string, typeVersion: string): void {
 	if (engineVersion === '*') {

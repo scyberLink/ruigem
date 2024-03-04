@@ -22,7 +22,7 @@ interface ruigPublishedExtension extends PublishedExtension {
 }
 
 export class PublicGalleryAPI {
-	private readonly client = new HttpClient('rem');
+	private readonly client = new HttpClient('ruigem');
 
 	constructor(private baseUrl: string, private apiVersion = '3.0-preview.1') {}
 

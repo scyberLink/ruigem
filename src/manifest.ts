@@ -108,8 +108,8 @@ export interface Manifest {
 	private?: boolean;
 	pricing?: string;
 
-	// rem
-	rem?: any;
+	// ruigem
+	ruigem?: any;
 
 	// not supported (npm)
 	// files?: string[];

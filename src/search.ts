@@ -43,7 +43,7 @@ export async function search(
 				'',
 				...buildResultTableView(results, stats),
 				'',
-				'For more information on an extension use "rem show <extensionId>"',
+				'For more information on an extension use "ruigem show <extensionId>"',
 			]
 				.map(line => wordTrim(line.replace(/\s+$/g, '')))
 				.join('\n')

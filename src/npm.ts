@@ -58,7 +58,7 @@ async function checkNPM(cancellationToken?: CancellationToken): Promise<void> {
 	const version = stdout.trim();
 
 	if (/^3\.7\.[0123]$/.test(version)) {
-		throw new Error(`npm@${version} doesn't work with rem. Please update npm: npm install -g npm`);
+		throw new Error(`npm@${version} doesn't work with ruigem. Please update npm: npm install -g npm`);
 	}
 }
 
@@ -198,7 +198,7 @@ async function getYarnDependencies(cwd: string, packagedDependencies?: string[])
 export async function detectYarn(cwd: string): Promise<boolean> {
 	for (const name of ['yarn.lock', '.yarnrc', '.yarnrc.yaml', '.pnp.cjs', '.yarn']) {
 		if (await exists(path.join(cwd, name))) {
-			if (!process.env['rem_TESTS']) {
+			if (!process.env['ruigem_TESTS']) {
 				log.info(
 					`Detected presence of ${name}. Using 'yarn' instead of 'npm' (to override this pass '--no-yarn' on the command line).`
 				);

@@ -1,4 +1,4 @@
-microsoft-ruig-rem
+microsoft-ruig-ruigem
 
 THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 Do Not Translate or Localize
@@ -73,7 +73,7 @@ END OF glob NOTICES AND INFORMATION
 
 %% lodash NOTICES AND INFORMATION BEGIN HERE
 Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
-Based on Underscore.js, copyright 2009-2015 Jeremy Ashkenas,
+Based on Underscore.js, copyright 2009-2015 Jeruigemy Ashkenas,
 DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
 
 Permission is hereby granted, free of charge, to any person obtaining

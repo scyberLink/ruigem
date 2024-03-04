@@ -383,8 +383,8 @@ export async function versionBump(options: IVersionBumpOptions): Promise<void> {
 		case 'minor':
 		case 'patch':
 			break;
-		case 'premajor':
-		case 'preminor':
+		case 'pruigemajor':
+		case 'pruigeminor':
 		case 'prepatch':
 		case 'prerelease':
 		case 'from-git':
@@ -408,7 +408,7 @@ export async function versionBump(options: IVersionBumpOptions): Promise<void> {
 
 	const { stdout, stderr } = await promisify(cp.execFile)(process.platform === 'win32' ? 'npm.cmd' : 'npm', args, { cwd });
 
-	if (!process.env['rem_TESTS']) {
+	if (!process.env['ruigem_TESTS']) {
 		process.stdout.write(stdout);
 		process.stderr.write(stderr);
 	}
@@ -642,7 +642,7 @@ export class TagsProcessor extends BaseProcessor {
 		const keybindings = doesContribute('keybindings') ? ['keybindings'] : [];
 		const debuggers = doesContribute('debuggers') ? ['debuggers'] : [];
 		const json = doesContribute('jsonValidation') ? ['json'] : [];
-		const remoteMenu = doesContribute('menus', 'statusBar/remoteIndicator') ? ['remote-menu'] : [];
+		const ruigemoteMenu = doesContribute('menus', 'statusBar/ruigemoteIndicator') ? ['ruigemote-menu'] : [];
 
 		const localizationContributions = ((contributes && contributes['localizations']) ?? []).reduce<string[]>(
 			(r, l) => [...r, `lp-${l.languageId}`, ...toLanguagePackTags(l.translations, l.languageId)],
@@ -682,7 +682,7 @@ export class TagsProcessor extends BaseProcessor {
 			...keybindings,
 			...debuggers,
 			...json,
-			...remoteMenu,
+			...ruigemoteMenu,
 			...localizationContributions,
 			...languageContributions,
 			...languageActivations,

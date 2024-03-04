@@ -9,7 +9,7 @@
 			"request": "launch",
 			"name": "Launch Program",
 			// "cwd": "<absolute path to your extension>",
-			"program": "${workspaceFolder}/rem",
+			"program": "${workspaceFolder}/ruigem",
 			"args": [
 				"--version"
 				// "ls", "package", "publish"
