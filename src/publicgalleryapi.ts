@@ -17,12 +17,12 @@ export interface ExtensionQuery {
 	readonly assetTypes?: string[];
 }
 
-interface VSCodePublishedExtension extends PublishedExtension {
+interface ruigPublishedExtension extends PublishedExtension {
 	publisher: { displayName: string; publisherName: string };
 }
 
 export class PublicGalleryAPI {
-	private readonly client = new HttpClient('vsce');
+	private readonly client = new HttpClient('rem');
 
 	constructor(private baseUrl: string, private apiVersion = '3.0-preview.1') {}
 
@@ -36,7 +36,7 @@ export class PublicGalleryAPI {
 		flags = [],
 		criteria = [],
 		assetTypes = [],
-	}: ExtensionQuery): Promise<VSCodePublishedExtension[]> {
+	}: ExtensionQuery): Promise<ruigPublishedExtension[]> {
 		const data = JSON.stringify({
 			filters: [{ pageNumber, pageSize, criteria }],
 			assetTypes,

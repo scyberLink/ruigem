@@ -11,7 +11,7 @@ export interface ExtensionStatisticsMap {
 	ratingcount: number;
 }
 
-interface VSCodePublishedExtension extends PublishedExtension {
+interface ruigPublishedExtension extends PublishedExtension {
 	publisher: { displayName: string; publisherName: string };
 }
 
@@ -32,7 +32,7 @@ export function show(extensionId: string, json: boolean = false): Promise<any> {
 				if (extension === undefined) {
 					log.error(`Extension "${extensionId}" not found.`);
 				} else {
-					showOverview(extension as VSCodePublishedExtension);
+					showOverview(extension as ruigPublishedExtension);
 				}
 			}
 		});
@@ -98,7 +98,7 @@ function showOverview({
 	statistics = [],
 	publishedDate,
 	lastUpdated,
-}: VSCodePublishedExtension) {
+}: ruigPublishedExtension) {
 	const [{ version = 'unknown' } = {}] = versions;
 	const versionTable = getVersionTable(versions);
 

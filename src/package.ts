@@ -18,7 +18,7 @@ import {
 	validateExtensionName,
 	validateVersion,
 	validateEngineCompatibility,
-	validateVSCodeTypesCompatibility,
+	validateruigTypesCompatibility,
 } from './validation';
 import { detectYarn, getDependencies } from './npm';
 import * as GitHost from 'hosted-git-info';
@@ -68,14 +68,14 @@ export interface IAsset {
 }
 
 /**
- * Options for the `createVSIX` function.
+ * Options for the `createREX` function.
  * @public
  */
 export interface IPackageOptions {
 	/**
-	 * The destination of the packaged the VSIX.
+	 * The destination of the packaged the REX.
 	 *
-	 * Defaults to `NAME-VERSION.vsix`.
+	 * Defaults to `NAME-VERSION.rex`.
 	 */
 	readonly packagePath?: string;
 	readonly version?: string;
@@ -158,10 +158,10 @@ export interface IProcessor {
 	onEnd(): Promise<void>;
 	assets: IAsset[];
 	tags: string[];
-	vsix: any;
+	rex: any;
 }
 
-export interface VSIX {
+export interface REX {
 	id: string;
 	displayName: string;
 	version: string;
@@ -199,7 +199,7 @@ export class BaseProcessor implements IProcessor {
 	constructor(protected manifest: Manifest) { }
 	assets: IAsset[] = [];
 	tags: string[] = [];
-	vsix: VSIX = Object.create(null);
+	rex: REX = Object.create(null);
 	async onFile(file: IFile): Promise<IFile> {
 		return file;
 	}
@@ -408,7 +408,7 @@ export async function versionBump(options: IVersionBumpOptions): Promise<void> {
 
 	const { stdout, stderr } = await promisify(cp.execFile)(process.platform === 'win32' ? 'npm.cmd' : 'npm', args, { cwd });
 
-	if (!process.env['VSCE_TESTS']) {
+	if (!process.env['rem_TESTS']) {
 		process.stdout.write(stdout);
 		process.stderr.write(stderr);
 	}
@@ -460,16 +460,16 @@ export class ManifestProcessor extends BaseProcessor {
 			let engineVersion: string;
 
 			try {
-				const engineSemver = parseSemver(`vscode@${manifest.engines['vscode']}`);
+				const engineSemver = parseSemver(`ruig@${manifest.engines['ruig']}`);
 				engineVersion = engineSemver.version;
 			} catch (err) {
-				throw new Error('Failed to parse semver of engines.vscode');
+				throw new Error('Failed to parse semver of engines.ruig');
 			}
 
 			if (target) {
 				if (engineVersion !== 'latest' && !semver.satisfies(engineVersion, '>=1.61', { includePrerelease: true })) {
 					throw new Error(
-						`Platform specific extension is supported by VS Code >=1.61. Current 'engines.vscode' is '${manifest.engines['vscode']}'.`
+						`Platform specific extension is supported by VS Code >=1.61. Current 'engines.ruig' is '${manifest.engines['ruig']}'.`
 					);
 				}
 				if (!Targets.has(target)) {
@@ -480,20 +480,20 @@ export class ManifestProcessor extends BaseProcessor {
 			if (preRelease) {
 				if (engineVersion !== 'latest' && !semver.satisfies(engineVersion, '>=1.63', { includePrerelease: true })) {
 					throw new Error(
-						`Pre-release versions are supported by VS Code >=1.63. Current 'engines.vscode' is '${manifest.engines['vscode']}'.`
+						`Pre-release versions are supported by VS Code >=1.63. Current 'engines.ruig' is '${manifest.engines['ruig']}'.`
 					);
 				}
 			}
 		}
 
-		this.vsix = {
-			...this.vsix,
+		this.rex = {
+			...this.rex,
 			id: manifest.name,
 			displayName: manifest.displayName ?? manifest.name,
 			version: options.version && !(options.updatePackageJson ?? true) ? options.version : manifest.version,
 			publisher: manifest.publisher,
 			target,
-			engine: manifest.engines['vscode'],
+			engine: manifest.engines['ruig'],
 			description: manifest.description ?? '',
 			pricing: manifest.pricing ?? 'Free',
 			categories: (manifest.categories ?? []).join(','),
@@ -522,7 +522,7 @@ export class ManifestProcessor extends BaseProcessor {
 		};
 
 		if (isGitHub) {
-			this.vsix.links.github = repository;
+			this.rex.links.github = repository;
 		}
 	}
 
@@ -548,13 +548,13 @@ export class ManifestProcessor extends BaseProcessor {
 	async onEnd(): Promise<void> {
 		if (typeof this.manifest.extensionKind === 'string') {
 			util.log.warn(
-				`The 'extensionKind' property should be of type 'string[]'. Learn more at: https://aka.ms/vscode/api/incorrect-execution-location`
+				`The 'extensionKind' property should be of type 'string[]'. Learn more at: https://aka.ms/ruig/api/incorrect-execution-location`
 			);
 		}
 
-		if (this.manifest.publisher === 'vscode-samples') {
+		if (this.manifest.publisher === 'ruig-samples') {
 			throw new Error(
-				"It's not allowed to use the 'vscode-samples' publisher. Learn more at: https://code.visualstudio.com/api/working-with-extensions/publishing-extension."
+				"It's not allowed to use the 'ruig-samples' publisher. Learn more at: https://code.visualstudio.com/api/working-with-extensions/publishing-extension."
 			);
 		}
 
@@ -970,7 +970,7 @@ export class LicenseProcessor extends BaseProcessor {
 			this.filter = regexp.test.bind(regexp);
 		}
 
-		delete this.vsix.license;
+		delete this.rex.license;
 	}
 
 	onFile(file: IFile): Promise<IFile> {
@@ -984,7 +984,7 @@ export class LicenseProcessor extends BaseProcessor {
 				}
 
 				this.assets.push({ type: 'Microsoft.VisualStudio.Services.Content.License', path: normalizedPath });
-				this.vsix.license = normalizedPath;
+				this.rex.license = normalizedPath;
 				this.didFindLicense = true;
 			}
 		}
@@ -1032,7 +1032,7 @@ class LaunchEntryPointProcessor extends BaseProcessor {
 		if (this.entryPoints.size > 0) {
 			const files: string = [...this.entryPoints].join(',\n  ');
 			throw new Error(
-				`Extension entrypoint(s) missing. Make sure these files exist and aren't ignored by '.vscodeignore':\n  ${files}`
+				`Extension entrypoint(s) missing. Make sure these files exist and aren't ignored by '.ruigignore':\n  ${files}`
 			);
 		}
 	}
@@ -1046,7 +1046,7 @@ class IconProcessor extends BaseProcessor {
 		super(manifest);
 
 		this.icon = manifest.icon && path.posix.normalize(`extension/${manifest.icon}`);
-		delete this.vsix.icon;
+		delete this.rex.icon;
 	}
 
 	onFile(file: IFile): Promise<IFile> {
@@ -1054,7 +1054,7 @@ class IconProcessor extends BaseProcessor {
 		if (normalizedPath === this.icon) {
 			this.didFindIcon = true;
 			this.assets.push({ type: 'Microsoft.VisualStudio.Services.Icons.Default', path: normalizedPath });
-			this.vsix.icon = this.icon;
+			this.rex.icon = this.icon;
 		}
 		return Promise.resolve(file);
 	}
@@ -1160,7 +1160,7 @@ export class NLSProcessor extends BaseProcessor {
 		// take last reference in the manifest for any given language
 		for (const localization of localizations) {
 			for (const translation of localization.translations) {
-				if (translation.id === 'vscode' && !!translation.path) {
+				if (translation.id === 'ruig' && !!translation.path) {
 					const translationPath = util.normalize(translation.path.replace(/^\.[\/\\]/, ''));
 					translations[localization.languageId.toUpperCase()] = `extension/${translationPath}`;
 				}
@@ -1209,7 +1209,7 @@ export class ValidationProcessor extends BaseProcessor {
 		}
 
 		const messages = [
-			`The following files have the same case insensitive path, which isn't supported by the VSIX format:`,
+			`The following files have the same case insensitive path, which isn't supported by the REX format:`,
 		];
 
 		for (const lower of this.duplicates) {
@@ -1239,11 +1239,11 @@ export function validateManifest(manifest: Manifest): Manifest {
 		throw new Error('Manifest missing field: engines');
 	}
 
-	if (!manifest.engines['vscode']) {
-		throw new Error('Manifest missing field: engines.vscode');
+	if (!manifest.engines['ruig']) {
+		throw new Error('Manifest missing field: engines.ruig');
 	}
 
-	const engineVersion = manifest.engines['vscode'];
+	const engineVersion = manifest.engines['ruig'];
 	validateEngineCompatibility(engineVersion);
 
 	const hasActivationEvents = !!manifest.activationEvents;
@@ -1260,10 +1260,10 @@ export function validateManifest(manifest: Manifest): Manifest {
 
 	let parsedEngineVersion: string;
 	try {
-		const engineSemver = parseSemver(`vscode@${engineVersion}`);
+		const engineSemver = parseSemver(`ruig@${engineVersion}`);
 		parsedEngineVersion = engineSemver.version;
 	} catch (err) {
-		throw new Error('Failed to parse semver of engines.vscode');
+		throw new Error('Failed to parse semver of engines.ruig');
 	}
 
 	if (
@@ -1282,8 +1282,8 @@ export function validateManifest(manifest: Manifest): Manifest {
 		throw new Error("Manifest needs the 'activationEvents' property, given it has a 'browser' property.");
 	}
 
-	if (manifest.devDependencies && manifest.devDependencies['@types/vscode']) {
-		validateVSCodeTypesCompatibility(manifest.engines['vscode'], manifest.devDependencies['@types/vscode']);
+	if (manifest.devDependencies && manifest.devDependencies['@types/ruig']) {
+		validateruigTypesCompatibility(manifest.engines['ruig'], manifest.devDependencies['@types/ruig']);
 	}
 
 	if (/\.svg$/i.test(manifest.icon || '')) {
@@ -1310,9 +1310,9 @@ export function validateManifest(manifest: Manifest): Manifest {
 	});
 
 	Object.keys(manifest.dependencies || {}).forEach(dep => {
-		if (dep === 'vscode') {
+		if (dep === 'ruig') {
 			throw new Error(
-				`You should not depend on 'vscode' in your 'dependencies'. Did you mean to add it to 'devDependencies'?`
+				`You should not depend on 'ruig' in your 'dependencies'. Did you mean to add it to 'devDependencies'?`
 			);
 		}
 	});
@@ -1401,21 +1401,21 @@ function escape(value: any): string {
 	return String(value).replace(/(['"<>&])/g, (_, char) => escapeChars.get(char)!);
 }
 
-export async function toVsixManifest(vsix: VSIX): Promise<string> {
+export async function toRexManifest(rex: REX): Promise<string> {
 	return `<?xml version="1.0" encoding="utf-8"?>
 	<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
 		<Metadata>
-			<Identity Language="en-US" Id="${escape(vsix.id)}" Version="${escape(vsix.version)}" Publisher="${escape(
-		vsix.publisher
-	)}" ${vsix.target ? `TargetPlatform="${escape(vsix.target)}"` : ''}/>
-			<DisplayName>${escape(vsix.displayName)}</DisplayName>
-			<Description xml:space="preserve">${escape(vsix.description)}</Description>
-			<Tags>${escape(vsix.tags)}</Tags>
-			<Categories>${escape(vsix.categories)}</Categories>
-			<GalleryFlags>${escape(vsix.flags)}</GalleryFlags>
-			${!vsix.badges
+			<Identity Language="en-US" Id="${escape(rex.id)}" Version="${escape(rex.version)}" Publisher="${escape(
+		rex.publisher
+	)}" ${rex.target ? `TargetPlatform="${escape(rex.target)}"` : ''}/>
+			<DisplayName>${escape(rex.displayName)}</DisplayName>
+			<Description xml:space="preserve">${escape(rex.description)}</Description>
+			<Tags>${escape(rex.tags)}</Tags>
+			<Categories>${escape(rex.categories)}</Categories>
+			<GalleryFlags>${escape(rex.flags)}</GalleryFlags>
+			${!rex.badges
 			? ''
-			: `<Badges>${vsix.badges
+			: `<Badges>${rex.badges
 				.map(
 					badge =>
 						`<Badge Link="${escape(badge.href)}" ImgUri="${escape(badge.url)}" Description="${escape(
@@ -1425,65 +1425,65 @@ export async function toVsixManifest(vsix: VSIX): Promise<string> {
 				.join('\n')}</Badges>`
 		}
 			<Properties>
-				<Property Id="Microsoft.VisualStudio.Code.Engine" Value="${escape(vsix.engine)}" />
-				<Property Id="Microsoft.VisualStudio.Code.ExtensionDependencies" Value="${escape(vsix.extensionDependencies)}" />
-				<Property Id="Microsoft.VisualStudio.Code.ExtensionPack" Value="${escape(vsix.extensionPack)}" />
-				<Property Id="Microsoft.VisualStudio.Code.ExtensionKind" Value="${escape(vsix.extensionKind)}" />
-				<Property Id="Microsoft.VisualStudio.Code.LocalizedLanguages" Value="${escape(vsix.localizedLanguages)}" />
-				${vsix.preRelease ? `<Property Id="Microsoft.VisualStudio.Code.PreRelease" Value="${escape(vsix.preRelease)}" />` : ''}
-				${vsix.sponsorLink
-			? `<Property Id="Microsoft.VisualStudio.Code.SponsorLink" Value="${escape(vsix.sponsorLink)}" />`
+				<Property Id="Microsoft.VisualStudio.Code.Engine" Value="${escape(rex.engine)}" />
+				<Property Id="Microsoft.VisualStudio.Code.ExtensionDependencies" Value="${escape(rex.extensionDependencies)}" />
+				<Property Id="Microsoft.VisualStudio.Code.ExtensionPack" Value="${escape(rex.extensionPack)}" />
+				<Property Id="Microsoft.VisualStudio.Code.ExtensionKind" Value="${escape(rex.extensionKind)}" />
+				<Property Id="Microsoft.VisualStudio.Code.LocalizedLanguages" Value="${escape(rex.localizedLanguages)}" />
+				${rex.preRelease ? `<Property Id="Microsoft.VisualStudio.Code.PreRelease" Value="${escape(rex.preRelease)}" />` : ''}
+				${rex.sponsorLink
+			? `<Property Id="Microsoft.VisualStudio.Code.SponsorLink" Value="${escape(rex.sponsorLink)}" />`
 			: ''
 		}
-				${!vsix.links.repository
+				${!rex.links.repository
 			? ''
-			: `<Property Id="Microsoft.VisualStudio.Services.Links.Source" Value="${escape(vsix.links.repository)}" />
-				<Property Id="Microsoft.VisualStudio.Services.Links.Getstarted" Value="${escape(vsix.links.repository)}" />
-				${vsix.links.github
-				? `<Property Id="Microsoft.VisualStudio.Services.Links.GitHub" Value="${escape(vsix.links.github)}" />`
+			: `<Property Id="Microsoft.VisualStudio.Services.Links.Source" Value="${escape(rex.links.repository)}" />
+				<Property Id="Microsoft.VisualStudio.Services.Links.Getstarted" Value="${escape(rex.links.repository)}" />
+				${rex.links.github
+				? `<Property Id="Microsoft.VisualStudio.Services.Links.GitHub" Value="${escape(rex.links.github)}" />`
 				: `<Property Id="Microsoft.VisualStudio.Services.Links.Repository" Value="${escape(
-					vsix.links.repository
+					rex.links.repository
 				)}" />`
 			}`
 		}
-				${vsix.links.bugs
-			? `<Property Id="Microsoft.VisualStudio.Services.Links.Support" Value="${escape(vsix.links.bugs)}" />`
+				${rex.links.bugs
+			? `<Property Id="Microsoft.VisualStudio.Services.Links.Support" Value="${escape(rex.links.bugs)}" />`
 			: ''
 		}
-				${vsix.links.homepage
-			? `<Property Id="Microsoft.VisualStudio.Services.Links.Learn" Value="${escape(vsix.links.homepage)}" />`
+				${rex.links.homepage
+			? `<Property Id="Microsoft.VisualStudio.Services.Links.Learn" Value="${escape(rex.links.homepage)}" />`
 			: ''
 		}
-				${vsix.galleryBanner.color
+				${rex.galleryBanner.color
 			? `<Property Id="Microsoft.VisualStudio.Services.Branding.Color" Value="${escape(
-				vsix.galleryBanner.color
+				rex.galleryBanner.color
 			)}" />`
 			: ''
 		}
-				${vsix.galleryBanner.theme
+				${rex.galleryBanner.theme
 			? `<Property Id="Microsoft.VisualStudio.Services.Branding.Theme" Value="${escape(
-				vsix.galleryBanner.theme
+				rex.galleryBanner.theme
 			)}" />`
 			: ''
 		}
-				<Property Id="Microsoft.VisualStudio.Services.GitHubFlavoredMarkdown" Value="${escape(vsix.githubMarkdown)}" />
-				<Property Id="Microsoft.VisualStudio.Services.Content.Pricing" Value="${escape(vsix.pricing)}"/>
+				<Property Id="Microsoft.VisualStudio.Services.GitHubFlavoredMarkdown" Value="${escape(rex.githubMarkdown)}" />
+				<Property Id="Microsoft.VisualStudio.Services.Content.Pricing" Value="${escape(rex.pricing)}"/>
 
-				${vsix.enableMarketplaceQnA !== undefined
+				${rex.enableMarketplaceQnA !== undefined
 			? `<Property Id="Microsoft.VisualStudio.Services.EnableMarketplaceQnA" Value="${escape(
-				vsix.enableMarketplaceQnA
+				rex.enableMarketplaceQnA
 			)}" />`
 			: ''
 		}
-				${vsix.customerQnALink !== undefined
+				${rex.customerQnALink !== undefined
 			? `<Property Id="Microsoft.VisualStudio.Services.CustomerQnALink" Value="${escape(
-				vsix.customerQnALink
+				rex.customerQnALink
 			)}" />`
 			: ''
 		}
 			</Properties>
-			${vsix.license ? `<License>${escape(vsix.license)}</License>` : ''}
-			${vsix.icon ? `<Icon>${escape(vsix.icon)}</Icon>` : ''}
+			${rex.license ? `<License>${escape(rex.license)}</License>` : ''}
+			${rex.icon ? `<Icon>${escape(rex.icon)}</Icon>` : ''}
 		</Metadata>
 		<Installation>
 			<InstallationTarget Id="Microsoft.VisualStudio.Code"/>
@@ -1491,7 +1491,7 @@ export async function toVsixManifest(vsix: VSIX): Promise<string> {
 		<Dependencies/>
 		<Assets>
 			<Asset Type="Microsoft.VisualStudio.Code.Manifest" Path="extension/package.json" Addressable="true" />
-			${vsix.assets
+			${rex.assets
 			.map(asset => `<Asset Type="${escape(asset.type)}" Path="${escape(asset.path)}" Addressable="true" />`)
 			.join('\n')}
 		</Assets>
@@ -1500,7 +1500,7 @@ export async function toVsixManifest(vsix: VSIX): Promise<string> {
 
 const defaultMimetypes = new Map<string, string>([
 	['.json', 'application/json'],
-	['.vsixmanifest', 'text/xml'],
+	['.rexmanifest', 'text/xml'],
 ]);
 
 export async function toContentTypes(files: IFile[]): Promise<string> {
@@ -1525,7 +1525,7 @@ export async function toContentTypes(files: IFile[]): Promise<string> {
 }
 
 const defaultIgnore = [
-	'.vscodeignore',
+	'.ruigignore',
 	'package-lock.json',
 	'npm-debug.log',
 	'yarn.lock',
@@ -1551,11 +1551,11 @@ const defaultIgnore = [
 	'.travis.yml',
 	'appveyor.yml',
 	'**/.git/**',
-	'**/*.vsix',
+	'**/*.rex',
 	'**/.DS_Store',
-	'**/*.vsixmanifest',
-	'**/.vscode-test/**',
-	'**/.vscode-test-web/**',
+	'**/*.rexmanifest',
+	'**/.ruig-test/**',
+	'**/.ruig-test-web/**',
 ];
 
 const notIgnored = ['!package.json', '!README.md'];
@@ -1601,7 +1601,7 @@ function collectFiles(
 
 		return (
 			fs.promises
-				.readFile(ignoreFile ? ignoreFile : path.join(cwd, '.vscodeignore'), 'utf8')
+				.readFile(ignoreFile ? ignoreFile : path.join(cwd, '.ruigignore'), 'utf8')
 				.catch<string>(err =>
 					err.code !== 'ENOENT' ? Promise.reject(err) : ignoreFile ? Promise.reject(err) : Promise.resolve('')
 				)
@@ -1661,11 +1661,11 @@ export function processFiles(processors: IProcessor[], files: IFile[]): Promise<
 					return r;
 				}, new Set()),
 			].join(',');
-			const vsix = processors.reduce<VSIX>((r, p) => ({ ...r, ...p.vsix }), { assets, tags } as VSIX);
+			const rex = processors.reduce<REX>((r, p) => ({ ...r, ...p.rex }), { assets, tags } as REX);
 
-			return Promise.all([toVsixManifest(vsix), toContentTypes(files)]).then(result => {
+			return Promise.all([toRexManifest(rex), toContentTypes(files)]).then(result => {
 				return [
-					{ path: 'extension.vsixmanifest', contents: Buffer.from(result[0], 'utf8') },
+					{ path: 'extension.rexmanifest', contents: Buffer.from(result[0], 'utf8') },
 					{ path: '[Content_Types].xml', contents: Buffer.from(result[1], 'utf8') },
 					...files,
 				];
@@ -1701,7 +1701,7 @@ export function collect(manifest: Manifest, options: IPackageOptions = {}): Prom
 	});
 }
 
-function writeVsix(files: IFile[], packagePath: string): Promise<void> {
+function writeRex(files: IFile[], packagePath: string): Promise<void> {
 	return fs.promises
 		.unlink(packagePath)
 		.catch(err => (err.code !== 'ENOENT' ? Promise.reject(err) : Promise.resolve(null)))
@@ -1736,14 +1736,14 @@ function getDefaultPackageName(manifest: Manifest, options: IPackageOptions): st
 	}
 
 	if (options.target) {
-		return `${manifest.name}-${options.target}-${version}.vsix`;
+		return `${manifest.name}-${options.target}-${version}.rex`;
 	}
 
-	return `${manifest.name}-${version}.vsix`;
+	return `${manifest.name}-${version}.rex`;
 }
 
 export async function prepublish(cwd: string, manifest: Manifest, useYarn?: boolean): Promise<void> {
-	if (!manifest.scripts || !manifest.scripts['vscode:prepublish']) {
+	if (!manifest.scripts || !manifest.scripts['ruig:prepublish']) {
 		return;
 	}
 
@@ -1751,11 +1751,11 @@ export async function prepublish(cwd: string, manifest: Manifest, useYarn?: bool
 		useYarn = await detectYarn(cwd);
 	}
 
-	console.log(`Executing prepublish script '${useYarn ? 'yarn' : 'npm'} run vscode:prepublish'...`);
+	console.log(`Executing prepublish script '${useYarn ? 'yarn' : 'npm'} run ruig:prepublish'...`);
 
 	await new Promise<void>((c, e) => {
 		const tool = useYarn ? 'yarn' : 'npm';
-		const child = cp.spawn(tool, ['run', 'vscode:prepublish'], { cwd, shell: true, stdio: 'inherit' });
+		const child = cp.spawn(tool, ['run', 'ruig:prepublish'], { cwd, shell: true, stdio: 'inherit' });
 		child.on('exit', code => (code === 0 ? c() : e(`${tool} failed with exit code ${code}`)));
 		child.on('error', e);
 	});
@@ -1787,7 +1787,7 @@ export async function pack(options: IPackageOptions = {}): Promise<IPackageResul
 
 	if (files.length > 5000 || jsFiles.length > 100) {
 		console.log(
-			`This extension consists of ${files.length} files, out of which ${jsFiles.length} are JavaScript files. For performance reasons, you should bundle your extension: https://aka.ms/vscode-bundle-extension . You should also exclude unnecessary files by adding them to your .vscodeignore: https://aka.ms/vscode-vscodeignore`
+			`This extension consists of ${files.length} files, out of which ${jsFiles.length} are JavaScript files. For performance reasons, you should bundle your extension: https://aka.ms/ruig-bundle-extension . You should also exclude unnecessary files by adding them to your .ruigignore: https://aka.ms/ruig-ruigignore`
 		);
 	}
 
@@ -1796,7 +1796,7 @@ export async function pack(options: IPackageOptions = {}): Promise<IPackageResul
 	}
 
 	const packagePath = await getPackagePath(cwd, manifest, options);
-	await writeVsix(files, path.resolve(packagePath));
+	await writeRex(files, path.resolve(packagePath));
 
 	return { manifest, packagePath, files };
 }

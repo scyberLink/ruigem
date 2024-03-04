@@ -1,6 +1,6 @@
 # README
 
->**Important:** Once installed the checker will only update if you add the setting `"spellMD.enable": true` to your `.vscode\settings.json` file.
+>**Important:** Once installed the checker will only update if you add the setting `"spellMD.enable": true` to your `.ruig\settings.json` file.
 
 This README covers off:
 * [Functionality](#functionality)
@@ -45,7 +45,7 @@ This extension is published in the VS Code Gallery.  So simply hit 'F1' and type
 To clone the extension and load locally...
 
 ```
-git clone https://github.com/Microsoft/vscode-SpellMD.git
+git clone https://github.com/Microsoft/ruig-SpellMD.git
 npm install
 tsc
 ```

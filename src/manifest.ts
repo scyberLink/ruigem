@@ -70,7 +70,7 @@ export interface Manifest {
 	version: string;
 	engines: { [name: string]: string };
 
-	// vscode
+	// ruig
 	publisher: string;
 	icon?: string;
 	contributes?: Contributions;
@@ -108,8 +108,8 @@ export interface Manifest {
 	private?: boolean;
 	pricing?: string;
 
-	// vsce
-	vsce?: any;
+	// rem
+	rem?: any;
 
 	// not supported (npm)
 	// files?: string[];

@@ -39,43 +39,43 @@ export function validateVersion(version: string): void {
 
 export function validateEngineCompatibility(version: string): void {
 	if (!version) {
-		throw new Error(`Missing vscode engine compatibility version`);
+		throw new Error(`Missing ruig engine compatibility version`);
 	}
 
 	if (!/^\*$|^(\^|>=)?((\d+)|x)\.((\d+)|x)\.((\d+)|x)(\-.*)?$/.test(version)) {
-		throw new Error(`Invalid vscode engine compatibility version '${version}'`);
+		throw new Error(`Invalid ruig engine compatibility version '${version}'`);
 	}
 }
 
 /**
- * User shouldn't use a newer version of @types/vscode than the one specified in engines.vscode
+ * User shouldn't use a newer version of @types/ruig than the one specified in engines.ruig
  *
  * NOTE: This is enforced at the major and minor level. Since we don't have control over the patch
  * version (it's auto-incremented by DefinitelyTyped), we don't look at the patch version at all.
  */
-export function validateVSCodeTypesCompatibility(engineVersion: string, typeVersion: string): void {
+export function validateruigTypesCompatibility(engineVersion: string, typeVersion: string): void {
 	if (engineVersion === '*') {
 		return;
 	}
 
 	if (!typeVersion) {
-		throw new Error(`Missing @types/vscode version`);
+		throw new Error(`Missing @types/ruig version`);
 	}
 
 	let plainEngineVersion: string, plainTypeVersion: string;
 
 	try {
-		const engineSemver = parseSemver(`vscode@${engineVersion}`);
+		const engineSemver = parseSemver(`ruig@${engineVersion}`);
 		plainEngineVersion = engineSemver.version;
 	} catch (err) {
-		throw new Error('Failed to parse semver of engines.vscode');
+		throw new Error('Failed to parse semver of engines.ruig');
 	}
 
 	try {
-		const typeSemver = parseSemver(`@types/vscode@${typeVersion}`);
+		const typeSemver = parseSemver(`@types/ruig@${typeVersion}`);
 		plainTypeVersion = typeSemver.version;
 	} catch (err) {
-		throw new Error('Failed to parse semver of @types/vscode');
+		throw new Error('Failed to parse semver of @types/ruig');
 	}
 
 	// For all `x`, use smallest version for comparison
@@ -97,7 +97,7 @@ export function validateVSCodeTypesCompatibility(engineVersion: string, typeVers
 	});
 
 	const error = new Error(
-		`@types/vscode ${typeVersion} greater than engines.vscode ${engineVersion}. Either upgrade engines.vscode or use an older @types/vscode version`
+		`@types/ruig ${typeVersion} greater than engines.ruig ${engineVersion}. Either upgrade engines.ruig or use an older @types/ruig version`
 	);
 
 	if (typeMajor > engineMajor) {

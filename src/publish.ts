@@ -7,7 +7,7 @@ import * as tmp from 'tmp';
 import { getPublisher } from './store';
 import { getGalleryAPI, read, getPublishedUrl, log, getHubUrl, patchOptionsWithManifest } from './util';
 import { Manifest } from './manifest';
-import { readVSIXPackage } from './zip';
+import { readREXPackage } from './zip';
 import { validatePublisher } from './validation';
 
 const tmpName = promisify(tmp.tmpName);
@@ -77,28 +77,28 @@ export async function publish(options: IPublishOptions = {}): Promise<any> {
 			throw new Error(`Both options not supported simultaneously: 'packagePath' and 'version'.`);
 		} else if (options.targets) {
 			throw new Error(
-				`Both options not supported simultaneously: 'packagePath' and 'target'. Use 'vsce package --target <target>' to first create a platform specific package, then use 'vsce publish --packagePath <path>' to publish it.`
+				`Both options not supported simultaneously: 'packagePath' and 'target'. Use 'rem package --target <target>' to first create a platform specific package, then use 'rem publish --packagePath <path>' to publish it.`
 			);
 		}
 
 		for (const packagePath of options.packagePath) {
-			const vsix = await readVSIXPackage(packagePath);
+			const rex = await readREXPackage(packagePath);
 			let target: string | undefined;
 
 			try {
-				target = vsix.xmlManifest.PackageManifest.Metadata[0].Identity[0].$.TargetPlatform ?? undefined;
+				target = rex.xmlManifest.PackageManifest.Metadata[0].Identity[0].$.TargetPlatform ?? undefined;
 			} catch (err) {
-				throw new Error(`Invalid extension VSIX manifest. ${err}`);
+				throw new Error(`Invalid extension REX manifest. ${err}`);
 			}
 
 			if (options.preRelease) {
 				let isPreReleasePackage = false;
 				try {
-					isPreReleasePackage = !!vsix.xmlManifest.PackageManifest.Metadata[0].Properties[0].Property.some(
+					isPreReleasePackage = !!rex.xmlManifest.PackageManifest.Metadata[0].Properties[0].Property.some(
 						p => p.$.Id === 'Microsoft.VisualStudio.Code.PreRelease'
 					);
 				} catch (err) {
-					throw new Error(`Invalid extension VSIX manifest. ${err}`);
+					throw new Error(`Invalid extension REX manifest. ${err}`);
 				}
 				if (!isPreReleasePackage) {
 					throw new Error(
@@ -107,7 +107,7 @@ export async function publish(options: IPublishOptions = {}): Promise<any> {
 				}
 			}
 
-			await _publish(packagePath, vsix.manifest, { ...options, target });
+			await _publish(packagePath, rex.manifest, { ...options, target });
 		}
 	} else {
 		const cwd = options.cwd || process.cwd();
@@ -223,9 +223,9 @@ async function _publish(packagePath: string, manifest: Manifest, options: IInter
 		const message = (err && err.message) || '';
 
 		if (/Personal Access Token used has expired/.test(message)) {
-			err.message = `${err.message}\n\nYou're using an expired Personal Access Token, please get a new PAT.\nMore info: https://aka.ms/vscodepat`;
+			err.message = `${err.message}\n\nYou're using an expired Personal Access Token, please get a new PAT.\nMore info: https://aka.ms/ruigpat`;
 		} else if (/Invalid Resource/.test(message)) {
-			err.message = `${err.message}\n\nYou're likely using an expired Personal Access Token, please get a new PAT.\nMore info: https://aka.ms/vscodepat`;
+			err.message = `${err.message}\n\nYou're likely using an expired Personal Access Token, please get a new PAT.\nMore info: https://aka.ms/ruigpat`;
 		}
 
 		throw err;

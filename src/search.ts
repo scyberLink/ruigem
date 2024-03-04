@@ -12,7 +12,7 @@ const excludeFlags = '37888'; //Value to exclude un-published, locked or hidden 
 
 const baseResultsTableHeaders = ['<ExtensionId>', '<Publisher>', '<Name>'];
 
-interface VSCodePublishedExtension extends PublishedExtension {
+interface ruigPublishedExtension extends PublishedExtension {
 	publisher: { displayName: string; publisherName: string };
 }
 export async function search(
@@ -34,7 +34,7 @@ export async function search(
 			ExtensionQueryFlags.IncludeLatestVersionOnly,
 			stats ? ExtensionQueryFlags.IncludeStatistics : 0,
 		],
-	})) as VSCodePublishedExtension[];
+	})) as ruigPublishedExtension[];
 
 	if (stats || !json) {
 		console.log(
@@ -43,7 +43,7 @@ export async function search(
 				'',
 				...buildResultTableView(results, stats),
 				'',
-				'For more information on an extension use "vsce show <extensionId>"',
+				'For more information on an extension use "rem show <extensionId>"',
 			]
 				.map(line => wordTrim(line.replace(/\s+$/g, '')))
 				.join('\n')
@@ -62,7 +62,7 @@ export async function search(
 	}
 }
 
-function buildResultTableView(results: VSCodePublishedExtension[], stats: boolean): string[] {
+function buildResultTableView(results: ruigPublishedExtension[], stats: boolean): string[] {
 	const values = results.map(({ publisher, extensionName, displayName, shortDescription, statistics }) => [
 		publisher.publisherName + '.' + extensionName,
 		publisher.displayName,

@@ -6,13 +6,13 @@ import {
 	read,
 	processFiles,
 	createDefaultProcessors,
-	toVsixManifest,
+	toRexManifest,
 	IFile,
 	validateManifest,
 	IPackageOptions,
 	ManifestProcessor,
 	versionBump,
-	VSIX,
+	REX,
 	LicenseProcessor,
 } from '../package';
 import { Manifest } from '../manifest';
@@ -30,7 +30,7 @@ import * as jsonc from 'jsonc-parser';
 console.warn = () => null;
 
 // accept read in tests
-process.env['VSCE_TESTS'] = 'true';
+process.env['rem_TESTS'] = 'true';
 
 async function throws(fn: () => Promise<any>): Promise<void> {
 	let didThrow = false;
@@ -48,19 +48,19 @@ async function throws(fn: () => Promise<any>): Promise<void> {
 
 const fixture = (name: string) => path.join(path.dirname(path.dirname(__dirname)), 'src', 'test', 'fixtures', name);
 
-function _toVsixManifest(manifest: Manifest, files: IFile[], options: IPackageOptions = {}): Promise<string> {
+function _toRexManifest(manifest: Manifest, files: IFile[], options: IPackageOptions = {}): Promise<string> {
 	const processors = createDefaultProcessors(manifest, options);
 	return processFiles(processors, files).then(() => {
 		const assets = flatten(processors.map(p => p.assets));
 		const tags = flatten(processors.map(p => p.tags)).join(',');
-		const vsix = processors.reduce((r, p) => ({ ...r, ...p.vsix }), { assets, tags } as VSIX);
+		const rex = processors.reduce((r, p) => ({ ...r, ...p.rex }), { assets, tags } as REX);
 
-		return toVsixManifest(vsix);
+		return toRexManifest(rex);
 	});
 }
 
 async function toXMLManifest(manifest: Manifest, files: IFile[] = []): Promise<XMLManifest> {
-	const raw = await _toVsixManifest(manifest, files);
+	const raw = await _toRexManifest(manifest, files);
 	return parseXmlManifest(raw);
 }
 
@@ -83,7 +83,7 @@ function createManifest(extra: Partial<Manifest> = {}): Manifest {
 		publisher: 'mocha',
 		version: '0.0.1',
 		description: 'test extension',
-		engines: { vscode: '*' },
+		engines: { ruig: '*' },
 		...extra,
 	};
 }
@@ -119,15 +119,15 @@ describe('collect', function () {
 			});
 	});
 
-	it('should ignore content of .vscodeignore', async () => {
-		const cwd = fixture('vscodeignore');
+	it('should ignore content of .ruigignore', async () => {
+		const cwd = fixture('ruigignore');
 		const manifest = await readManifest(cwd);
 		const files = await collect(manifest, { cwd });
 		const names = files.map(f => f.path).sort();
 
 		assert.deepStrictEqual(names, [
 			'[Content_Types].xml',
-			'extension.vsixmanifest',
+			'extension.rexmanifest',
 			'extension/foo/bar/hello.txt',
 			'extension/package.json',
 		]);
@@ -138,7 +138,7 @@ describe('collect', function () {
 		return readManifest(cwd)
 			.then(manifest => collect(manifest, { cwd }))
 			.then(files => {
-				//   ..extension.vsixmanifest
+				//   ..extension.rexmanifest
 				// [Content_Types].xml
 				// extension/package.json
 				// extension/node_modules/real/dependency.js
@@ -155,13 +155,13 @@ describe('collect', function () {
 			});
 	});
 
-	it('should ignore **/.vsixmanifest', () => {
-		const cwd = fixture('vsixmanifest');
+	it('should ignore **/.rexmanifest', () => {
+		const cwd = fixture('rexmanifest');
 
 		return readManifest(cwd)
 			.then(manifest => collect(manifest, { cwd }))
 			.then(files => {
-				assert.strictEqual(files.filter(f => /\.vsixmanifest$/.test(f.path)).length, 1);
+				assert.strictEqual(files.filter(f => /\.rexmanifest$/.test(f.path)).length, 1);
 			});
 	});
 
@@ -271,21 +271,21 @@ describe('readManifest', () => {
 
 describe('validateManifest', () => {
 	it('should catch missing fields', () => {
-		assert.ok(validateManifest({ publisher: 'demo', name: 'demo', version: '1.0.0', engines: { vscode: '0.10.1' } }));
+		assert.ok(validateManifest({ publisher: 'demo', name: 'demo', version: '1.0.0', engines: { ruig: '0.10.1' } }));
 		assert.throws(() => {
-			validateManifest({ publisher: 'demo', name: null!, version: '1.0.0', engines: { vscode: '0.10.1' } });
+			validateManifest({ publisher: 'demo', name: null!, version: '1.0.0', engines: { ruig: '0.10.1' } });
 		});
 		assert.throws(() => {
-			validateManifest({ publisher: 'demo', name: 'demo', version: null!, engines: { vscode: '0.10.1' } });
+			validateManifest({ publisher: 'demo', name: 'demo', version: null!, engines: { ruig: '0.10.1' } });
 		});
 		assert.throws(() => {
-			validateManifest({ publisher: 'demo', name: 'demo', version: '1.0', engines: { vscode: '0.10.1' } });
+			validateManifest({ publisher: 'demo', name: 'demo', version: '1.0', engines: { ruig: '0.10.1' } });
 		});
 		assert.throws(() => {
 			validateManifest({ publisher: 'demo', name: 'demo', version: '1.0.0', engines: null! });
 		});
 		assert.throws(() => {
-			validateManifest({ publisher: 'demo', name: 'demo', version: '1.0.0', engines: { vscode: null } as any });
+			validateManifest({ publisher: 'demo', name: 'demo', version: '1.0.0', engines: { ruig: null } as any });
 		});
 		validatePublisher('demo');
 		assert.throws(() => validatePublisher(undefined!));
@@ -407,7 +407,7 @@ describe('validateManifest', () => {
 	it('should allow implicit activation events', () => {
 		validateManifest(
 			createManifest({
-				engines: { vscode: '>=1.74.0' },
+				engines: { ruig: '>=1.74.0' },
 				main: 'main.js',
 				contributes: {
 					commands: [
@@ -422,7 +422,7 @@ describe('validateManifest', () => {
 
 		validateManifest(
 			createManifest({
-				engines: { vscode: '*' },
+				engines: { ruig: '*' },
 				main: 'main.js',
 				contributes: {
 					commands: [
@@ -437,7 +437,7 @@ describe('validateManifest', () => {
 
 		validateManifest(
 			createManifest({
-				engines: { vscode: '>=1.74.0' },
+				engines: { ruig: '>=1.74.0' },
 				contributes: {
 					languages: [
 						{
@@ -451,7 +451,7 @@ describe('validateManifest', () => {
 		assert.throws(() =>
 			validateManifest(
 				createManifest({
-					engines: { vscode: '>=1.73.3' },
+					engines: { ruig: '>=1.73.3' },
 					main: 'main.js',
 				})
 			)
@@ -460,7 +460,7 @@ describe('validateManifest', () => {
 		assert.throws(() =>
 			validateManifest(
 				createManifest({
-					engines: { vscode: '>=1.73.3' },
+					engines: { ruig: '>=1.73.3' },
 					activationEvents: ['*'],
 				})
 			)
@@ -469,7 +469,7 @@ describe('validateManifest', () => {
 		assert.throws(() =>
 			validateManifest(
 				createManifest({
-					engines: { vscode: '>=1.73.3' },
+					engines: { ruig: '>=1.73.3' },
 					main: 'main.js',
 					contributes: {
 						commands: [
@@ -485,7 +485,7 @@ describe('validateManifest', () => {
 	});
 });
 
-describe('toVsixManifest', () => {
+describe('toRexManifest', () => {
 	it('should produce a good xml', () => {
 		const manifest = {
 			name: 'test',
@@ -495,7 +495,7 @@ describe('toVsixManifest', () => {
 			engines: Object.create(null),
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				assert.ok(result);
@@ -546,7 +546,7 @@ describe('toVsixManifest', () => {
 			engines: Object.create(null),
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.strictEqual(result.PackageManifest.Metadata[0].Identity[0].$.Version, version);
@@ -567,7 +567,7 @@ describe('toVsixManifest', () => {
 
 		const files = [{ path: 'extension/readme.md', contents: Buffer.from('') }];
 
-		return _toVsixManifest(manifest, files)
+		return _toRexManifest(manifest, files)
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.strictEqual(result.PackageManifest.Assets[0].Asset.length, 2);
@@ -590,7 +590,7 @@ describe('toVsixManifest', () => {
 
 		const files = [{ path: 'extension/foo/readme-foo.md', contents: Buffer.from('') }];
 
-		return _toVsixManifest(manifest, files, { readmePath: 'foo/readme-foo.md' })
+		return _toRexManifest(manifest, files, { readmePath: 'foo/readme-foo.md' })
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.strictEqual(result.PackageManifest.Assets[0].Asset.length, 2);
@@ -613,7 +613,7 @@ describe('toVsixManifest', () => {
 
 		const files = [{ path: 'extension/changelog.md', contents: Buffer.from('') }];
 
-		return _toVsixManifest(manifest, files)
+		return _toRexManifest(manifest, files)
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.strictEqual(result.PackageManifest.Assets[0].Asset.length, 2);
@@ -636,7 +636,7 @@ describe('toVsixManifest', () => {
 
 		const files = [{ path: 'extension/foo/changelog-foo.md', contents: Buffer.from('') }];
 
-		return _toVsixManifest(manifest, files, { changelogPath: 'foo/changelog-foo.md' })
+		return _toRexManifest(manifest, files, { changelogPath: 'foo/changelog-foo.md' })
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.strictEqual(result.PackageManifest.Assets[0].Asset.length, 2);
@@ -657,7 +657,7 @@ describe('toVsixManifest', () => {
 			engines: Object.create(null),
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.strictEqual(result.PackageManifest.Metadata[0].Identity[0].$.Id, 'test');
@@ -677,7 +677,7 @@ describe('toVsixManifest', () => {
 
 		const files = [{ path: 'extension/thelicense.md', contents: '' }];
 
-		return _toVsixManifest(manifest, files)
+		return _toRexManifest(manifest, files)
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.strictEqual(result.PackageManifest.Assets[0].Asset.length, 2);
@@ -701,7 +701,7 @@ describe('toVsixManifest', () => {
 
 		const files = [{ path: 'extension/thelicense.md', contents: '' }];
 
-		return _toVsixManifest(manifest, files)
+		return _toRexManifest(manifest, files)
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.ok(result.PackageManifest.Metadata[0].License);
@@ -721,7 +721,7 @@ describe('toVsixManifest', () => {
 
 		const files = [{ path: 'extension/LICENSE.md', contents: '' }];
 
-		return _toVsixManifest(manifest, files)
+		return _toRexManifest(manifest, files)
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.ok(result.PackageManifest.Metadata[0].License);
@@ -747,7 +747,7 @@ describe('toVsixManifest', () => {
 
 		const files = [{ path: 'extension/LICENCE.md', contents: '' }];
 
-		return _toVsixManifest(manifest, files)
+		return _toRexManifest(manifest, files)
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.ok(result.PackageManifest.Metadata[0].License);
@@ -778,7 +778,7 @@ describe('toVsixManifest', () => {
 			{ path: 'extension/thelicense.md', contents: '' },
 		];
 
-		return _toVsixManifest(manifest, files)
+		return _toRexManifest(manifest, files)
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.ok(result.PackageManifest.Metadata[0].Icon);
@@ -800,7 +800,7 @@ describe('toVsixManifest', () => {
 
 		const files = [{ path: 'extension/fake.png', contents: '' }];
 
-		return _toVsixManifest(manifest, files)
+		return _toRexManifest(manifest, files)
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.ok(
@@ -827,7 +827,7 @@ describe('toVsixManifest', () => {
 			{ path: 'extension\\thelicense.md', contents: '' },
 		];
 
-		return _toVsixManifest(manifest, files)
+		return _toRexManifest(manifest, files)
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.ok(result.PackageManifest.Metadata[0].Icon);
@@ -849,7 +849,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property.map(p => p.$);
@@ -870,15 +870,15 @@ describe('toVsixManifest', () => {
 			engines: Object.create(null),
 			repository: {
 				type: 'git',
-				url: 'https://server.com/Microsoft/vscode-spell-check.git',
+				url: 'https://server.com/Microsoft/ruig-spell-check.git',
 			},
 			bugs: {
-				url: 'https://server.com/Microsoft/vscode-spell-check/issues',
+				url: 'https://server.com/Microsoft/ruig-spell-check/issues',
 			},
-			homepage: 'https://server.com/Microsoft/vscode-spell-check',
+			homepage: 'https://server.com/Microsoft/ruig-spell-check',
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property.map(p => p.$);
@@ -886,35 +886,35 @@ describe('toVsixManifest', () => {
 					properties.some(
 						p =>
 							p.Id === 'Microsoft.VisualStudio.Services.Links.Source' &&
-							p.Value === 'https://server.com/Microsoft/vscode-spell-check.git'
+							p.Value === 'https://server.com/Microsoft/ruig-spell-check.git'
 					)
 				);
 				assert.ok(
 					properties.some(
 						p =>
 							p.Id === 'Microsoft.VisualStudio.Services.Links.Getstarted' &&
-							p.Value === 'https://server.com/Microsoft/vscode-spell-check.git'
+							p.Value === 'https://server.com/Microsoft/ruig-spell-check.git'
 					)
 				);
 				assert.ok(
 					properties.some(
 						p =>
 							p.Id === 'Microsoft.VisualStudio.Services.Links.Repository' &&
-							p.Value === 'https://server.com/Microsoft/vscode-spell-check.git'
+							p.Value === 'https://server.com/Microsoft/ruig-spell-check.git'
 					)
 				);
 				assert.ok(
 					properties.some(
 						p =>
 							p.Id === 'Microsoft.VisualStudio.Services.Links.Support' &&
-							p.Value === 'https://server.com/Microsoft/vscode-spell-check/issues'
+							p.Value === 'https://server.com/Microsoft/ruig-spell-check/issues'
 					)
 				);
 				assert.ok(
 					properties.some(
 						p =>
 							p.Id === 'Microsoft.VisualStudio.Services.Links.Learn' &&
-							p.Value === 'https://server.com/Microsoft/vscode-spell-check'
+							p.Value === 'https://server.com/Microsoft/ruig-spell-check'
 					)
 				);
 			});
@@ -928,11 +928,11 @@ describe('toVsixManifest', () => {
 			engines: Object.create(null),
 			repository: {
 				type: 'git',
-				url: 'https://github.com/Microsoft/vscode-spell-check.git',
+				url: 'https://github.com/Microsoft/ruig-spell-check.git',
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property.map(p => p.$);
@@ -940,7 +940,7 @@ describe('toVsixManifest', () => {
 					properties.some(
 						p =>
 							p.Id === 'Microsoft.VisualStudio.Services.Links.GitHub' &&
-							p.Value === 'https://github.com/Microsoft/vscode-spell-check.git'
+							p.Value === 'https://github.com/Microsoft/ruig-spell-check.git'
 					)
 				);
 				assert.ok(properties.every(p => p.Id !== 'Microsoft.VisualStudio.Services.Links.Repository'));
@@ -953,10 +953,10 @@ describe('toVsixManifest', () => {
 			publisher: 'mocha',
 			version: '0.0.1',
 			engines: Object.create(null),
-			repository: 'gitlab:Microsoft/vscode-spell-check',
+			repository: 'gitlab:Microsoft/ruig-spell-check',
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property.map(p => p.$);
@@ -964,21 +964,21 @@ describe('toVsixManifest', () => {
 					properties.some(
 						p =>
 							p.Id === 'Microsoft.VisualStudio.Services.Links.Repository' &&
-							p.Value === 'https://gitlab.com/Microsoft/vscode-spell-check.git'
+							p.Value === 'https://gitlab.com/Microsoft/ruig-spell-check.git'
 					)
 				);
 				assert.ok(
 					properties.some(
 						p =>
 							p.Id === 'Microsoft.VisualStudio.Services.Links.Support' &&
-							p.Value === 'https://gitlab.com/Microsoft/vscode-spell-check/issues'
+							p.Value === 'https://gitlab.com/Microsoft/ruig-spell-check/issues'
 					)
 				);
 				assert.ok(
 					properties.some(
 						p =>
 							p.Id === 'Microsoft.VisualStudio.Services.Links.Learn' &&
-							p.Value === 'https://gitlab.com/Microsoft/vscode-spell-check#readme'
+							p.Value === 'https://gitlab.com/Microsoft/ruig-spell-check#readme'
 					)
 				);
 			});
@@ -990,10 +990,10 @@ describe('toVsixManifest', () => {
 			publisher: 'mocha',
 			version: '0.0.1',
 			engines: Object.create(null),
-			repository: 'Microsoft/vscode-spell-check',
+			repository: 'Microsoft/ruig-spell-check',
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property.map(p => p.$);
@@ -1001,7 +1001,7 @@ describe('toVsixManifest', () => {
 					properties.some(
 						p =>
 							p.Id === 'Microsoft.VisualStudio.Services.Links.GitHub' &&
-							p.Value === 'https://github.com/Microsoft/vscode-spell-check.git'
+							p.Value === 'https://github.com/Microsoft/ruig-spell-check.git'
 					)
 				);
 				assert.ok(properties.every(p => p.Id !== 'Microsoft.VisualStudio.Services.Links.Repository'));
@@ -1017,7 +1017,7 @@ describe('toVsixManifest', () => {
 			categories: ['hello', 'world'],
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				const categories = result.PackageManifest.Metadata[0].Categories[0].split(',');
@@ -1035,7 +1035,7 @@ describe('toVsixManifest', () => {
 			preview: true,
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				assert.deepEqual(result.PackageManifest.Metadata[0].GalleryFlags, ['Public Preview']);
@@ -1053,7 +1053,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1072,7 +1072,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => assert.deepEqual(result.PackageManifest.Metadata[0].Tags[0], '__web_extension'));
 	});
@@ -1088,7 +1088,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1107,7 +1107,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1126,7 +1126,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1145,7 +1145,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1170,7 +1170,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1187,7 +1187,7 @@ describe('toVsixManifest', () => {
 			activationEvents: ['onLanguage:go'],
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => assert.deepEqual(result.PackageManifest.Metadata[0].Tags[0], 'go,__web_extension'));
 	});
@@ -1203,7 +1203,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => assert.deepEqual(result.PackageManifest.Metadata[0].Tags[0], 'go,__web_extension'));
 	});
@@ -1219,7 +1219,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => assert.deepEqual(result.PackageManifest.Metadata[0].Tags[0], 'snippet,__web_extension'));
 	});
@@ -1233,7 +1233,7 @@ describe('toVsixManifest', () => {
 			keywords: ['theme', 'theme'],
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => assert.deepEqual(result.PackageManifest.Metadata[0].Tags[0], 'theme,__web_extension'));
 	});
@@ -1249,7 +1249,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1276,7 +1276,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1300,7 +1300,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1317,7 +1317,7 @@ describe('toVsixManifest', () => {
 			description: 'This C++ extension likes combines ftp with javascript',
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1354,7 +1354,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1378,7 +1378,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1399,23 +1399,23 @@ describe('toVsixManifest', () => {
 					{
 						languageId: 'de',
 						translations: [
-							{ id: 'vscode', path: 'fake.json' },
-							{ id: 'vscode.go', path: 'what.json' },
+							{ id: 'ruig', path: 'fake.json' },
+							{ id: 'ruig.go', path: 'what.json' },
 						],
 					},
 				],
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
 				assert.ok(tags.some(tag => tag === 'lp-de'));
-				assert.ok(tags.some(tag => tag === '__lp_vscode'));
-				assert.ok(tags.some(tag => tag === '__lp-de_vscode'));
-				assert.ok(tags.some(tag => tag === '__lp_vscode.go'));
-				assert.ok(tags.some(tag => tag === '__lp-de_vscode.go'));
+				assert.ok(tags.some(tag => tag === '__lp_ruig'));
+				assert.ok(tags.some(tag => tag === '__lp-de_ruig'));
+				assert.ok(tags.some(tag => tag === '__lp_ruig.go'));
+				assert.ok(tags.some(tag => tag === '__lp-de_ruig.go'));
 			});
 	});
 
@@ -1431,15 +1431,15 @@ describe('toVsixManifest', () => {
 						languageId: 'de',
 						languageName: 'German',
 						translations: [
-							{ id: 'vscode', path: 'de.json' },
-							{ id: 'vscode.go', path: 'what.json' },
+							{ id: 'ruig', path: 'de.json' },
+							{ id: 'ruig.go', path: 'what.json' },
 						],
 					},
 					{
 						languageId: 'pt',
 						languageName: 'Portuguese',
 						localizedLanguageName: 'Português',
-						translations: [{ id: 'vscode', path: './translations/pt.json' }],
+						translations: [{ id: 'ruig', path: './translations/pt.json' }],
 					},
 				],
 			},
@@ -1450,7 +1450,7 @@ describe('toVsixManifest', () => {
 			{ path: 'extension/translations/pt.json', contents: Buffer.from('') },
 		];
 
-		return _toVsixManifest(manifest, files)
+		return _toRexManifest(manifest, files)
 			.then(parseXmlManifest)
 			.then(result => {
 				const assets = result.PackageManifest.Assets[0].Asset;
@@ -1495,7 +1495,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1520,7 +1520,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1540,7 +1540,7 @@ describe('toVsixManifest', () => {
 			],
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(xml => parseXmlManifest(xml))
 			.then(result => {
 				const badges = result.PackageManifest.Metadata[0].Badges[0].Badge;
@@ -1576,7 +1576,7 @@ describe('toVsixManifest', () => {
 			},
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const tags = result.PackageManifest.Metadata[0].Tags[0].split(',') as string[];
@@ -1590,10 +1590,10 @@ describe('toVsixManifest', () => {
 			publisher: 'mocha',
 			version: '0.0.1',
 			description: 'test extension',
-			engines: { vscode: '^1.0.0' } as any,
+			engines: { ruig: '^1.0.0' } as any,
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property;
@@ -1614,7 +1614,7 @@ describe('toVsixManifest', () => {
 			engines: Object.create(null),
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property;
@@ -1636,7 +1636,7 @@ describe('toVsixManifest', () => {
 			engines: Object.create(null),
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property;
@@ -1658,7 +1658,7 @@ describe('toVsixManifest', () => {
 			engines: Object.create(null),
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property;
@@ -1680,7 +1680,7 @@ describe('toVsixManifest', () => {
 			extensionDependencies: ['foo.bar', 'foo.bar', 'monkey.hello'],
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property;
@@ -1709,7 +1709,7 @@ describe('toVsixManifest', () => {
 		];
 
 		try {
-			await _toVsixManifest(manifest, files);
+			await _toRexManifest(manifest, files);
 		} catch (err: any) {
 			assert.ok(/have the same case insensitive path/i.test(err.message));
 			return;
@@ -1722,8 +1722,8 @@ describe('toVsixManifest', () => {
 		const manifest = createManifest({ browser: 'browser.js' });
 		const files = [{ path: 'extension/browser.js', contents: Buffer.from('') }];
 
-		const vsixManifest = await _toVsixManifest(manifest, files);
-		const result = await parseXmlManifest(vsixManifest);
+		const rexManifest = await _toRexManifest(manifest, files);
+		const result = await parseXmlManifest(rexManifest);
 
 		assert.strictEqual(result.PackageManifest.Metadata[0].Tags[0], '__web_extension');
 	});
@@ -1734,8 +1734,8 @@ describe('toVsixManifest', () => {
 		});
 		const files = [{ path: 'extension/main.js', contents: Buffer.from('') }];
 
-		const vsixManifest = await _toVsixManifest(manifest, files);
-		const result = await parseXmlManifest(vsixManifest);
+		const rexManifest = await _toRexManifest(manifest, files);
+		const result = await parseXmlManifest(rexManifest);
 		const properties = result.PackageManifest.Metadata[0].Properties[0].Property;
 		const extensionKindProps = properties.filter(p => p.$.Id === 'Microsoft.VisualStudio.Code.ExtensionKind');
 		assert.strictEqual(extensionKindProps[0].$.Value, ['ui', 'workspace', 'web'].join(','));
@@ -1747,8 +1747,8 @@ describe('toVsixManifest', () => {
 		});
 		const files = [{ path: 'extension/main.js', contents: Buffer.from('') }];
 
-		const vsixManifest = await _toVsixManifest(manifest, files);
-		const result = await parseXmlManifest(vsixManifest);
+		const rexManifest = await _toRexManifest(manifest, files);
+		const result = await parseXmlManifest(rexManifest);
 		const properties = result.PackageManifest.Metadata[0].Properties[0].Property;
 		const extensionKindProps = properties.filter(p => p.$.Id === 'Microsoft.VisualStudio.Code.ExtensionKind');
 		assert.strictEqual(extensionKindProps[0].$.Value, 'workspace');
@@ -1756,7 +1756,7 @@ describe('toVsixManifest', () => {
 
 	it('should not have target platform by default', async () => {
 		const manifest = createManifest();
-		const raw = await _toVsixManifest(manifest, []);
+		const raw = await _toRexManifest(manifest, []);
 		const dom = await parseXmlManifest(raw);
 
 		assert.strictEqual(dom.PackageManifest.Metadata[0].Identity[0].$.Id, 'test');
@@ -1767,7 +1767,7 @@ describe('toVsixManifest', () => {
 
 	it('should set the right target platform by default', async () => {
 		const manifest = createManifest();
-		const raw = await _toVsixManifest(manifest, [], { target: 'win32-x64' });
+		const raw = await _toRexManifest(manifest, [], { target: 'win32-x64' });
 		const dom = await parseXmlManifest(raw);
 
 		assert.strictEqual(dom.PackageManifest.Metadata[0].Identity[0].$.Id, 'test');
@@ -1777,8 +1777,8 @@ describe('toVsixManifest', () => {
 	});
 
 	it('should set the target platform when engine is set to insider', async () => {
-		const manifest = createManifest({ engines: { vscode: '>=1.62.0-insider' } });
-		const raw = await _toVsixManifest(manifest, [], { target: 'win32-x64' });
+		const manifest = createManifest({ engines: { ruig: '>=1.62.0-insider' } });
+		const raw = await _toRexManifest(manifest, [], { target: 'win32-x64' });
 		const dom = await parseXmlManifest(raw);
 
 		assert.strictEqual(dom.PackageManifest.Metadata[0].Identity[0].$.Id, 'test');
@@ -1791,7 +1791,7 @@ describe('toVsixManifest', () => {
 		const manifest = createManifest();
 
 		try {
-			await _toVsixManifest(manifest, [], { target: 'what' });
+			await _toRexManifest(manifest, [], { target: 'what' });
 		} catch (err: any) {
 			return assert.ok(/is not a valid VS Code target/i.test(err.message));
 		}
@@ -1803,7 +1803,7 @@ describe('toVsixManifest', () => {
 		const manifest = createManifest();
 
 		try {
-			await _toVsixManifest(manifest, [], { target: 'linux-ia32' });
+			await _toRexManifest(manifest, [], { target: 'linux-ia32' });
 		} catch (err: any) {
 			return assert.ok(/not a valid VS Code target/.test(err.message));
 		}
@@ -1812,10 +1812,10 @@ describe('toVsixManifest', () => {
 	});
 
 	it('should throw when targeting an old VS Code version with platform specific', async () => {
-		const manifest = createManifest({ engines: { vscode: '>=1.60.0' } });
+		const manifest = createManifest({ engines: { ruig: '>=1.60.0' } });
 
 		try {
-			await _toVsixManifest(manifest, [], { target: 'linux-ia32' });
+			await _toRexManifest(manifest, [], { target: 'linux-ia32' });
 		} catch (err: any) {
 			return assert.ok(/>=1.61/.test(err.message));
 		}
@@ -1824,9 +1824,9 @@ describe('toVsixManifest', () => {
 	});
 
 	it('should add prerelease property when --pre-release flag is passed', async () => {
-		const manifest = createManifest({ engines: { vscode: '>=1.63.0' } });
+		const manifest = createManifest({ engines: { ruig: '>=1.63.0' } });
 
-		const raw = await _toVsixManifest(manifest, [], { preRelease: true });
+		const raw = await _toRexManifest(manifest, [], { preRelease: true });
 		const xmlManifest = await parseXmlManifest(raw);
 
 		assertProperty(xmlManifest, 'Microsoft.VisualStudio.Code.PreRelease', 'true');
@@ -1843,7 +1843,7 @@ describe('toVsixManifest', () => {
 			sponsor,
 		};
 
-		return _toVsixManifest(manifest, [])
+		return _toRexManifest(manifest, [])
 			.then(parseXmlManifest)
 			.then(result => {
 				const properties = result.PackageManifest.Metadata[0].Properties[0].Property;
@@ -1854,35 +1854,35 @@ describe('toVsixManifest', () => {
 
 	it('should automatically add sponsor tag for extension with sponsor link', async () => {
 		const manifest = createManifest({ sponsor: { url: 'https://foo.bar' } });
-		const vsixManifest = await _toVsixManifest(manifest, []);
-		const result = await parseXmlManifest(vsixManifest);
+		const rexManifest = await _toRexManifest(manifest, []);
+		const result = await parseXmlManifest(rexManifest);
 
 		assert.ok(result.PackageManifest.Metadata[0].Tags[0].split(',').includes('__sponsor_extension'));
 	});
 
 	it('should add prerelease property when --pre-release flag is passed when engine property is for insiders', async () => {
-		const manifest = createManifest({ engines: { vscode: '>=1.64.0-insider' } });
+		const manifest = createManifest({ engines: { ruig: '>=1.64.0-insider' } });
 
-		const raw = await _toVsixManifest(manifest, [], { preRelease: true });
+		const raw = await _toRexManifest(manifest, [], { preRelease: true });
 		const xmlManifest = await parseXmlManifest(raw);
 
 		assertProperty(xmlManifest, 'Microsoft.VisualStudio.Code.PreRelease', 'true');
 	});
 
 	it('should not add prerelease property when --pre-release flag is not passed', async () => {
-		const manifest = createManifest({ engines: { vscode: '>=1.64.0' } });
+		const manifest = createManifest({ engines: { ruig: '>=1.64.0' } });
 
-		const raw = await _toVsixManifest(manifest, []);
+		const raw = await _toRexManifest(manifest, []);
 		const xmlManifest = await parseXmlManifest(raw);
 
 		assertMissingProperty(xmlManifest, 'Microsoft.VisualStudio.Code.PreRelease');
 	});
 
 	it('should throw when targeting an old VS Code version with --pre-release', async () => {
-		const manifest = createManifest({ engines: { vscode: '>=1.62.0' } });
+		const manifest = createManifest({ engines: { ruig: '>=1.62.0' } });
 
 		try {
-			await _toVsixManifest(manifest, [], { preRelease: true });
+			await _toRexManifest(manifest, [], { preRelease: true });
 		} catch (err: any) {
 			return assert.ok(/>=1.63/.test(err.message));
 		}
@@ -1892,7 +1892,7 @@ describe('toVsixManifest', () => {
 
 	it('should identify trial version of an extension', async () => {
 		const manifest = createManifest({ pricing: 'Trial' });
-		var raw = await _toVsixManifest(manifest, []);
+		var raw = await _toRexManifest(manifest, []);
 		const xmlManifest = await parseXmlManifest(raw);
 		assertProperty(xmlManifest, 'Microsoft.VisualStudio.Services.Content.Pricing', 'Trial');
 	});
@@ -1987,7 +1987,7 @@ describe('toContentTypes', () => {
 				assert.ok(result.Types);
 				assert.ok(result.Types.Default);
 				assert.strictEqual(result.Types.Default.length, 2);
-				assert.ok(result.Types.Default.some(d => d.$.Extension === '.vsixmanifest' && d.$.ContentType === 'text/xml'));
+				assert.ok(result.Types.Default.some(d => d.$.Extension === '.rexmanifest' && d.$.ContentType === 'text/xml'));
 				assert.ok(result.Types.Default.some(d => d.$.Extension === '.json' && d.$.ContentType === 'application/json'));
 			});
 	});
@@ -2029,7 +2029,7 @@ describe('LaunchEntryPointProcessor', () => {
 		let didErr = false;
 
 		try {
-			await _toVsixManifest(manifest, files);
+			await _toRexManifest(manifest, files);
 		} catch (err: any) {
 			const message = err.message;
 			didErr = message.includes('entrypoint(s) missing') && message.includes('main.js');
@@ -2041,13 +2041,13 @@ describe('LaunchEntryPointProcessor', () => {
 	it('should work even if .js extension is not used', async () => {
 		const manifest = createManifest({ main: 'out/src/extension' });
 		const files = [{ path: 'extension/out/src/extension.js', contents: Buffer.from('') }];
-		await _toVsixManifest(manifest, files);
+		await _toRexManifest(manifest, files);
 	});
 
 	it('should accept manifest if no entrypoints defined', async () => {
 		const manifest = createManifest({});
 		const files = [{ path: 'extension/something.js', contents: Buffer.from('') }];
-		await _toVsixManifest(manifest, files);
+		await _toRexManifest(manifest, files);
 	});
 });
 describe('ManifestProcessor', () => {
@@ -2079,7 +2079,7 @@ describe('ManifestProcessor', () => {
 
 		manifest = JSON.parse(await read(await processor.onFile(packageJson)));
 		assert.deepStrictEqual(manifest.version, '1.1.1');
-		assert.deepStrictEqual(processor.vsix.version, '1.1.1');
+		assert.deepStrictEqual(processor.rex.version, '1.1.1');
 
 		manifest = JSON.parse(await fs.promises.readFile(path.join(root, 'package.json'), 'utf8'));
 		assert.deepStrictEqual(manifest.version, '1.0.0');
@@ -2099,7 +2099,7 @@ describe('ManifestProcessor', () => {
 
 		manifest = JSON.parse(await read(await processor.onFile(packageJson)));
 		assert.deepStrictEqual(manifest.version, '1.0.0');
-		assert.deepStrictEqual(processor.vsix.version, '1.0.0');
+		assert.deepStrictEqual(processor.rex.version, '1.0.0');
 
 		manifest = JSON.parse(await fs.promises.readFile(path.join(root, 'package.json'), 'utf8'));
 		assert.deepStrictEqual(manifest.version, '1.0.0');
@@ -2921,7 +2921,7 @@ describe('version', function () {
 	this.timeout(5000);
 
 	let dir: tmp.DirResult;
-	const fixtureFolder = fixture('vsixmanifest');
+	const fixtureFolder = fixture('rexmanifest');
 	let cwd: string;
 
 	const git = (args: string[]) => spawnSync('git', args, { cwd, encoding: 'utf-8' });

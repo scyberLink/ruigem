@@ -10,14 +10,14 @@ import { EOL } from 'os';
 
 const __read = promisify<_read.Options, string>(_read);
 export function read(prompt: string, options: _read.Options = {}): Promise<string> {
-	if (process.env['VSCE_TESTS'] || !process.stdout.isTTY) {
+	if (process.env['rem_TESTS'] || !process.stdout.isTTY) {
 		return Promise.resolve('y');
 	}
 
 	return __read({ prompt, ...options });
 }
 
-const marketplaceUrl = process.env['VSCE_MARKETPLACE_URL'] || 'https://marketplace.visualstudio.com';
+const marketplaceUrl = process.env['rem_MARKETPLACE_URL'] || 'https://marketplace.visualstudio.com';
 
 export function getPublishedUrl(extension: string): string {
 	return `${marketplaceUrl}/items?itemName=${extension}`;
@@ -167,15 +167,15 @@ export const log = {
 };
 
 export function patchOptionsWithManifest(options: any, manifest: Manifest): void {
-	if (!manifest.vsce) {
+	if (!manifest.rem) {
 		return;
 	}
 
-	for (const key of Object.keys(manifest.vsce)) {
+	for (const key of Object.keys(manifest.rem)) {
 		const optionsKey = key === 'yarn' ? 'useYarn' : key;
 
 		if (options[optionsKey] === undefined) {
-			options[optionsKey] = manifest.vsce[key];
+			options[optionsKey] = manifest.rem[key];
 		}
 	}
 }

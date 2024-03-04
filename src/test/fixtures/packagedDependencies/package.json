@@ -3,7 +3,7 @@
 	"publisher": "jrieken",
 	"version": "1.0.0",
 	"engines": {
-		"vscode": "*"
+		"ruig": "*"
 	},
 	"dependencies": {
 		"isexe": "1.0.0",

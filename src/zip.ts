@@ -45,18 +45,18 @@ export async function readZip(packagePath: string, filter: (name: string) => boo
 	});
 }
 
-export async function readVSIXPackage(packagePath: string): Promise<{ manifest: Manifest; xmlManifest: XMLManifest }> {
-	const map = await readZip(packagePath, name => /^extension\/package\.json$|^extension\.vsixmanifest$/i.test(name));
+export async function readREXPackage(packagePath: string): Promise<{ manifest: Manifest; xmlManifest: XMLManifest }> {
+	const map = await readZip(packagePath, name => /^extension\/package\.json$|^extension\.rexmanifest$/i.test(name));
 	const rawManifest = map.get('extension/package.json');
 
 	if (!rawManifest) {
 		throw new Error('Manifest not found');
 	}
 
-	const rawXmlManifest = map.get('extension.vsixmanifest');
+	const rawXmlManifest = map.get('extension.rexmanifest');
 
 	if (!rawXmlManifest) {
-		throw new Error('VSIX manifest not found');
+		throw new Error('REX manifest not found');
 	}
 
 	return {

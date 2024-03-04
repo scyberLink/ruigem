@@ -18,7 +18,7 @@ export interface IStore extends Iterable<IPublisher> {
 }
 
 export class FileStore implements IStore {
-	private static readonly DefaultPath = path.join(homedir(), '.vsce');
+	private static readonly DefaultPath = path.join(homedir(), '.rem');
 
 	static async open(path: string = FileStore.DefaultPath): Promise<FileStore> {
 		try {
@@ -73,7 +73,7 @@ export class FileStore implements IStore {
 }
 
 export class KeytarStore implements IStore {
-	static async open(serviceName = 'vscode-vsce'): Promise<KeytarStore> {
+	static async open(serviceName = 'ruig-rem'): Promise<KeytarStore> {
 		const keytar = await import('keytar');
 		const creds = await keytar.findCredentials(serviceName);
 
@@ -123,7 +123,7 @@ export async function verifyPat(pat: string, publisherName?: string): Promise<vo
 			publisherName = (await readManifest()).publisher;
 		} catch (error) {
 			throw new Error(
-				`Can not read the publisher's name. Either supply it as an argument or run vsce from the extension folder. Additional information:\n\n${error}`
+				`Can not read the publisher's name. Either supply it as an argument or run rem from the extension folder. Additional information:\n\n${error}`
 			);
 		}
 	}
@@ -150,7 +150,7 @@ async function requestPAT(publisherName: string): Promise<string> {
 }
 
 async function openDefaultStore(): Promise<IStore> {
-	if (/^file$/i.test(process.env['VSCE_STORE'] ?? '')) {
+	if (/^file$/i.test(process.env['rem_STORE'] ?? '')) {
 		return await FileStore.open();
 	}
 

@@ -10,7 +10,7 @@ resources:
   repositories:
     - repository: templates
       type: github
-      name: microsoft/vscode-engineering
+      name: microsoft/ruig-engineering
       ref: main
       endpoint: Monaco
 
@@ -24,7 +24,7 @@ extends:
   template: azure-pipelines/npm-package/pipeline.yml@templates
   parameters:
     npmPackages:
-      - name: vsce
+      - name: rem
         buildSteps:
           - script: npm ci
           - script: npm run build

@@ -4,7 +4,7 @@ import {
 	validateExtensionName,
 	validateVersion,
 	validateEngineCompatibility,
-	validateVSCodeTypesCompatibility,
+	validateruigTypesCompatibility,
 } from '../validation';
 
 describe('validatePublisher', () => {
@@ -106,30 +106,30 @@ describe('validateEngineCompatibility', () => {
 	});
 });
 
-describe('validateVSCodeTypesCompatibility', () => {
+describe('validateruigTypesCompatibility', () => {
 	it('should validate', () => {
-		validateVSCodeTypesCompatibility('*', '1.30.0');
-		validateVSCodeTypesCompatibility('*', '^1.30.0');
-		validateVSCodeTypesCompatibility('*', '~1.30.0');
+		validateruigTypesCompatibility('*', '1.30.0');
+		validateruigTypesCompatibility('*', '^1.30.0');
+		validateruigTypesCompatibility('*', '~1.30.0');
 
-		validateVSCodeTypesCompatibility('1.30.0', '1.30.0');
-		validateVSCodeTypesCompatibility('1.30.0', '1.20.0');
-		validateVSCodeTypesCompatibility('1.46.0', '1.45.1');
-		validateVSCodeTypesCompatibility('1.45.0', '1.45.1');
+		validateruigTypesCompatibility('1.30.0', '1.30.0');
+		validateruigTypesCompatibility('1.30.0', '1.20.0');
+		validateruigTypesCompatibility('1.46.0', '1.45.1');
+		validateruigTypesCompatibility('1.45.0', '1.45.1');
 
-		assert.throws(() => validateVSCodeTypesCompatibility('1.30.0', '1.40.0'));
-		assert.throws(() => validateVSCodeTypesCompatibility('1.30.0', '^1.40.0'));
-		assert.throws(() => validateVSCodeTypesCompatibility('1.30.0', '~1.40.0'));
+		assert.throws(() => validateruigTypesCompatibility('1.30.0', '1.40.0'));
+		assert.throws(() => validateruigTypesCompatibility('1.30.0', '^1.40.0'));
+		assert.throws(() => validateruigTypesCompatibility('1.30.0', '~1.40.0'));
 
-		assert.throws(() => validateVSCodeTypesCompatibility('1.30.0', '1.40.0'));
-		assert.throws(() => validateVSCodeTypesCompatibility('^1.30.0', '1.40.0'));
-		assert.throws(() => validateVSCodeTypesCompatibility('~1.30.0', '1.40.0'));
+		assert.throws(() => validateruigTypesCompatibility('1.30.0', '1.40.0'));
+		assert.throws(() => validateruigTypesCompatibility('^1.30.0', '1.40.0'));
+		assert.throws(() => validateruigTypesCompatibility('~1.30.0', '1.40.0'));
 
-		assert.throws(() => validateVSCodeTypesCompatibility('1.x.x', '1.30.0'));
-		assert.throws(() => validateVSCodeTypesCompatibility('1.x.0', '1.30.0'));
+		assert.throws(() => validateruigTypesCompatibility('1.x.x', '1.30.0'));
+		assert.throws(() => validateruigTypesCompatibility('1.x.0', '1.30.0'));
 
-		assert.throws(() => validateVSCodeTypesCompatibility('1.5.0', '1.30.0'));
-		assert.throws(() => validateVSCodeTypesCompatibility('1.5', '1.30.0'));
-		assert.throws(() => validateVSCodeTypesCompatibility('1.5', '1.30'));
+		assert.throws(() => validateruigTypesCompatibility('1.5.0', '1.30.0'));
+		assert.throws(() => validateruigTypesCompatibility('1.5', '1.30.0'));
+		assert.throws(() => validateruigTypesCompatibility('1.5', '1.30'));
 	});
 });

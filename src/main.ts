@@ -71,7 +71,7 @@ module.exports = function (argv: string[]): void {
 			(val, all) => (all ? all.concat(val) : [val]),
 			undefined
 		)
-		.option('--ignoreFile <path>', 'Indicate alternative .vscodeignore')
+		.option('--ignoreFile <path>', 'Indicate alternative .ruigignore')
 		// default must remain undefined for dependencies or we will fail to load defaults from package.json
 		.option('--dependencies', 'Enable dependency detection via npm or yarn', undefined)
 		.option('--no-dependencies', 'Disable dependency detection via npm or yarn', undefined)
@@ -83,7 +83,7 @@ module.exports = function (argv: string[]): void {
 		.command('package [version]')
 		.alias('pack')
 		.description('Packages an extension')
-		.option('-o, --out <path>', 'Output .vsix extension file to <path> location (defaults to <name>-<version>.vsix)')
+		.option('-o, --out <path>', 'Output .rex extension file to <path> location (defaults to <name>-<version>.rex)')
 		.option('-t, --target <target>', `Target architecture. Valid targets: ${ValidTargets}`)
 		.option('--ignore-other-target-folders', `Ignore other target folders. Valid only when --target <target> is provided.`)
 		.option('--readme-path <path>', 'Path to README file (defaults to README.md)')
@@ -107,7 +107,7 @@ module.exports = function (argv: string[]): void {
 		.option('--baseImagesUrl <url>', 'Prepend all relative image links in README.md with the specified URL.')
 		.option('--yarn', 'Use yarn instead of npm (default inferred from presence of yarn.lock or .yarnrc)')
 		.option('--no-yarn', 'Use npm instead of yarn (default inferred from absence of yarn.lock or .yarnrc)')
-		.option('--ignoreFile <path>', 'Indicate alternative .vscodeignore')
+		.option('--ignoreFile <path>', 'Indicate alternative .ruigignore')
 		.option('--no-gitHubIssueLinking', 'Disable automatic expansion of GitHub-style issue syntax into links')
 		.option('--no-gitLabIssueLinking', 'Disable automatic expansion of GitLab-style issue syntax into links')
 		// default must remain undefined for dependencies or we will fail to load defaults from package.json
@@ -179,8 +179,8 @@ module.exports = function (argv: string[]): void {
 		.description('Publishes an extension')
 		.option(
 			'-p, --pat <token>',
-			'Personal Access Token (defaults to VSCE_PAT environment variable)',
-			process.env['VSCE_PAT']
+			'Personal Access Token (defaults to rem_PAT environment variable)',
+			process.env['rem_PAT']
 		)
 		.option('-t, --target <targets...>', `Target architectures. Valid targets: ${ValidTargets}`)
 		.option('--ignore-other-target-folders', `Ignore other target folders. Valid only when --target <target> is provided.`)
@@ -192,7 +192,7 @@ module.exports = function (argv: string[]): void {
 			'Do not create a version commit and tag when calling `npm version`. Valid only when [version] is provided.'
 		)
 		.option('--no-update-package-json', 'Do not update `package.json`. Valid only when [version] is provided.')
-		.option('-i, --packagePath <paths...>', 'Publish the provided VSIX packages.')
+		.option('-i, --packagePath <paths...>', 'Publish the provided REX packages.')
 		.option(
 			'--githubBranch <branch>',
 			'The GitHub branch used to infer relative links in README.md. Can be overridden by --baseContentUrl and --baseImagesUrl.'
@@ -208,7 +208,7 @@ module.exports = function (argv: string[]): void {
 		.option('--noVerify', 'Allow all proposed APIs (deprecated: use --allow-all-proposed-apis instead)')
 		.option('--allow-proposed-apis <apis...>', 'Allow specific proposed APIs')
 		.option('--allow-all-proposed-apis', 'Allow all proposed APIs')
-		.option('--ignoreFile <path>', 'Indicate alternative .vscodeignore')
+		.option('--ignoreFile <path>', 'Indicate alternative .ruigignore')
 		// default must remain undefined for dependencies or we will fail to load defaults from package.json
 		.option('--dependencies', 'Enable dependency detection via npm or yarn', undefined)
 		.option('--no-dependencies', 'Disable dependency detection via npm or yarn', undefined)
@@ -280,7 +280,7 @@ module.exports = function (argv: string[]): void {
 
 	program
 		.command('unpublish [extensionid]')
-		.description('Unpublishes an extension. Example extension id: ms-vscode.live-server.')
+		.description('Unpublishes an extension. Example extension id: ms-ruig.live-server.')
 		.option('-p, --pat <token>', 'Personal Access Token')
 		.option('-f, --force', 'Skip confirmation prompt when unpublishing an extension')
 		.action((id, { pat, force }) => main(unpublish({ id, pat, force })));
@@ -310,8 +310,8 @@ module.exports = function (argv: string[]): void {
 		.description('Verifies if the Personal Access Token has publish rights for the publisher')
 		.option(
 			'-p, --pat <token>',
-			'Personal Access Token (defaults to VSCE_PAT environment variable)',
-			process.env['VSCE_PAT']
+			'Personal Access Token (defaults to rem_PAT environment variable)',
+			process.env['rem_PAT']
 		)
 		.action((name, { pat }) => main(verifyPat(pat, name)));
 
@@ -332,7 +332,7 @@ module.exports = function (argv: string[]): void {
 	program.on('command:*', ([cmd]: string) => {
 		if (cmd === 'create-publisher') {
 			log.error(
-				`The 'create-publisher' command is no longer available. You can create a publisher directly in the Marketplace: https://aka.ms/vscode-create-publisher`
+				`The 'create-publisher' command is no longer available. You can create a publisher directly in the Marketplace: https://aka.ms/ruig-create-publisher`
 			);
 
 			process.exit(1);
@@ -350,8 +350,8 @@ module.exports = function (argv: string[]): void {
 	});
 
 	program.description(`${pkg.description}
-To learn more about the VS Code extension API: https://aka.ms/vscode-extension-api
-To connect with the VS Code extension developer community: https://aka.ms/vscode-discussions`);
+	To learn more about the Ruig extension API: https://aka.ms/ruig-extension-api
+	To connect with the Ruig extension developer community: https://aka.ms/ruig-discussions`);
 
 	program.parse(argv);
 };

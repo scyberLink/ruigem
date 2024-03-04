@@ -5,7 +5,7 @@ import { packageCommand, listFiles as _listFiles, IPackageOptions } from './pack
  * @deprecated prefer IPackageOptions instead
  * @public
  */
-export type IBaseVSIXOptions = Pick<
+export type IBaseREXOptions = Pick<
 	IPackageOptions,
 	'baseContentUrl' | 'baseImagesUrl' | 'githubBranch' | 'gitlabBranch' | 'useYarn' | 'target' | 'preRelease'
 >;
@@ -14,7 +14,7 @@ export type IBaseVSIXOptions = Pick<
  * @deprecated prefer IPackageOptions instead
  * @public
  */
-export type ICreateVSIXOptions = Pick<IPackageOptions, 'cwd' | 'packagePath'> & IBaseVSIXOptions;
+export type ICreateREXOptions = Pick<IPackageOptions, 'cwd' | 'packagePath'> & IBaseREXOptions;
 
 /**
  * The supported list of package managers.
@@ -49,8 +49,8 @@ export interface IListFilesOptions {
 	packagedDependencies?: string[];
 
 	/**
-	 * The location of an alternative .vscodeignore file to be used.
-	 * The `.vscodeignore` file located at the root of the project will be taken
+	 * The location of an alternative .ruigignore file to be used.
+	 * The `.ruigignore` file located at the root of the project will be taken
 	 * instead, if none is specified.
 	 */
 	ignoreFile?: string;
@@ -59,10 +59,10 @@ export interface IListFilesOptions {
 export type { IPackageOptions } from './package';
 
 /**
- * Creates a VSIX from the extension in the current working directory.
+ * Creates a REX from the extension in the current working directory.
  * @public
  */
-export function createVSIX(options: IPackageOptions = {}): Promise<any> {
+export function createREX(options: IPackageOptions = {}): Promise<any> {
 	return packageCommand(options);
 }
 
@@ -89,16 +89,16 @@ export function listFiles(options: IListFilesOptions = {}): Promise<string[]> {
 }
 
 /**
- * Options for the `publishVSIX` function.
+ * Options for the `publishREX` function.
  * @public
  */
-export type IPublishVSIXOptions = IPublishOptions & Pick<IPackageOptions, 'target'>;
+export type IPublishREXOptions = IPublishOptions & Pick<IPackageOptions, 'target'>;
 
 /**
- * Publishes a pre-build VSIX.
+ * Publishes a pre-build REX.
  * @public
  */
-export function publishVSIX(packagePath: string | string[], options: IPublishVSIXOptions = {}): Promise<any> {
+export function publishREX(packagePath: string | string[], options: IPublishREXOptions = {}): Promise<any> {
 	return _publish({
 		packagePath: typeof packagePath === 'string' ? [packagePath] : packagePath,
 		...options,
