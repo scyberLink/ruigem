@@ -5,6 +5,7 @@ import leven from 'leven';
 import path from "path";
 import { minify } from 'terser';
 import IManifest from "./IManifest";
+import IAnyObject from "./IAnyObject";
 import { ZipFile } from "yazl";
 import IFile from "./IFile";
 
@@ -99,7 +100,7 @@ async function _package(assetsDir: string) {
 
 	spawnSync('npx', ['tsc'])
 
-	let importations: string[] = []
+	let importations: IAnyObject = {}
 	let files: string[] = []
 
 	const ignorePatterns = readIgnorePatterns();
@@ -109,7 +110,7 @@ async function _package(assetsDir: string) {
 	spawnSync('rm', ['-rf', outDir])
 	spawnSync('mkdir', ['-p', outDir])
 	fs.writeFileSync(bundlePath, compiled);
-	fs.writeFileSync(importationsPath, JSON.stringify(importations));
+	fs.writeFileSync(importationsPath, JSON.stringify(Object.keys(importations)));
 	fs.writeFileSync(manifestPath, JSON.stringify(manifest));
 
 	const result = await minify(compiled, { mangle: true })
@@ -119,7 +120,7 @@ async function _package(assetsDir: string) {
 
 }
 
-function __package(directory: string, files: string[], importations: string[], ignorePatterns: RegExp[]): string[] {
+function __package(directory: string, files: string[], importations: IAnyObject, ignorePatterns: RegExp[]): string[] {
 	const children = fs.readdirSync(directory);
 
 	children.forEach(item => {
@@ -133,7 +134,9 @@ function __package(directory: string, files: string[], importations: string[], i
 				const fileContent = fs.readFileSync(filePath, 'utf8');
 				const { stripped, imports } = stripImportsAndExports(fileContent);
 				files.push(stripped);
-				importations.push(...imports);
+				for (const imported of imports) {
+					importations[imported] = imported
+				}
 			}
 		}
 	});
