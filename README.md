@@ -1,6 +1,6 @@
 # ruigem
 
-> _The Visual Studio Code Extension Manager_
+> _The Ruig Extension Manager_
 
 [![Build Status](https://dev.azure.com/monacotools/Monaco/_apis/build/status/npm/microsoft.ruig-ruigem?repoName=microsoft%2Fruig-ruigem&branchName=main)](https://dev.azure.com/monacotools/Monaco/_build/latest?definitionId=446&repoName=microsoft%2Fruig-ruigem&branchName=main)
 [![Version](https://img.shields.io/npm/v/ruigem.svg)](https://npmjs.org/package/ruigem)
