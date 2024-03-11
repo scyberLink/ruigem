@@ -230,7 +230,7 @@ async function writeRex(files: IFile[], packagePath: string, outDir: string) {
 }
 
 function collectFiles(outDir: string, assetsDir: string, manifest: IManifest): IFile[] {
-	const files = _collectFiles([], assetsDir, assetsDir, manifest)
+	const files = _collectFiles([], path.resolve(process.cwd(), assetsDir), assetsDir, manifest)
 
 	const children = fs.readdirSync(outDir);
 
