@@ -105,7 +105,7 @@ async function _package(assetsDir: string) {
 
 	const ignorePatterns = readIgnorePatterns();
 
-	const compiled = __package(tsBuildDir, files, importations, ignorePatterns).join('\n\n').trim().concat('\n\n', `new ${manifest.classname}(appContainer)`).replace(/assets\//g, `extension-store/${manifest.publisher}/${manifest.name}/`)
+	const compiled = __package(tsBuildDir, files, importations, ignorePatterns).join('\n\n').trim().concat('\n\n', `new ${manifest.classname}(REI.appContainer)`).replace(/assets\//g, `extension-store/${manifest.publisher}/${manifest.name}/`)
 
 	spawnSync('rm', ['-rf', outDir])
 	spawnSync('mkdir', ['-p', outDir])
